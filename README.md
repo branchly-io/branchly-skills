@@ -1,6 +1,6 @@
 # branchly-skills
 
-OpenCode skills for [branchly](https://branchly.io) applications.
+Skills for managing and optimizing [branchly](https://branchly.io) applications.
 
 ## Skills
 
@@ -29,8 +29,8 @@ npx skills add branchly-io/branchly-skills --skill optimize-application
 
 ## Requirements
 
-- [OpenCode](https://opencode.ai) with the [branchly MCP server](https://docs.branchly.io/docs/mcp-server) configured
-- branchly MCP server connected (provides `branchly-app_*` tools)
+- [OpenCode](https://opencode.ai) or any other agent platform (Claude Code, Codex, Gemini CLI, Cursor, etc.) with the [branchly MCP server](https://docs.branchly.io/docs/mcp-server) configured
+- branchly MCP server connected (provides `branchly_*` tools)
 
 ## License
 
