@@ -38,7 +38,7 @@ Routing contract    → Bot uses the right tool for the right intent
 Start by pulling recent sessions with problematic answer types:
 
 ```
-branchly-app_read_sessions(
+branchly_read_sessions(
   answer_types=["no_knowledge", "outside_scope"],
   interactions=["chat"],
   limit=10
@@ -48,7 +48,7 @@ branchly-app_read_sessions(
 For each flagged session, read the full detail:
 
 ```
-branchly-app_read_session_detail(session_id="...")
+branchly_read_session_detail(session_id="...")
 ```
 
 **Decision tree from session data:**
@@ -79,8 +79,8 @@ If the answer_type is `no_knowledge`, verify whether the knowledge actually exis
 Sample several nodes from the data source that returned low-quality results:
 
 ```
-branchly-app_list_nodes(data_source_ids=["<ds-id>"], limit=10)
-branchly-app_read_node(node_id="...")
+branchly_list_nodes(data_source_ids=["<ds-id>"], limit=10)
+branchly_read_node(node_id="...")
 ```
 
 Look for: navigation menus, footer links, cookie banners, repeated header text, legal boilerplate embedded in content.
@@ -91,11 +91,11 @@ Look for: navigation menus, footer links, cookie banners, repeated header text, 
 
 ```
 # 1. Read the full current settings first
-branchly-app_list_data_sources()
+branchly_list_data_sources()
 // → copy the full settings object from the relevant data source
 
 # 2. Update with the COMPLETE settings object, changing only remove_html_elements
-branchly-app_update_data_source(
+branchly_update_data_source(
   data_source_id="...",
   settings={
     "type": "website_crawler",
@@ -125,9 +125,9 @@ branchly-app_update_data_source(
 **Before setting any score_boost, always read the current node first:**
 
 ```
-branchly-app_read_node(node_id="...")
+branchly_read_node(node_id="...")
 // Check existing score_boost value
-branchly-app_update_node(node_id="...", score_boost=1.5)
+branchly_update_node(node_id="...", score_boost=1.5)
 ```
 
 ### 2d. Retrieval settings recommendations
@@ -141,8 +141,8 @@ Tell the user as a recommendation (these require backend/dashboard changes, not 
 If a `search_knowledge_base` tool exists, check if it can be tuned:
 
 ```
-branchly-app_list_tools(active=true)
-branchly-app_read_tool(tool_id="...")
+branchly_list_tools(active=true)
+branchly_read_tool(tool_id="...")
 ```
 
 Consider:
@@ -151,7 +151,7 @@ Consider:
 - **Switch to parent_context retrieval**: set `retrieval_method: "parent_context"` to inject surrounding chunk context
 
 ```
-branchly-app_update_tool(
+branchly_update_tool(
   tool_id="...",
   function_arguments={
     "object": "knowledge_base_tool_arguments",
@@ -172,19 +172,19 @@ If after all checks, the content truly doesn't exist:
 
 ## Step 3 — Audit AI Actions & Prompt Alignment
 
-> **Terminology**: branchly calls configured callable functions **"AI Actions"** in the UI and official docs. The MCP API exposes them via `branchly-app_list_tools` / `branchly-app_update_tool`. Both terms refer to the same thing.
+> **Terminology**: branchly calls configured callable functions **"AI Actions"** in the UI and official docs. The MCP API exposes them via `branchly_list_tools` / `branchly_update_tool`. Both terms refer to the same thing.
 
 ### 3a. Read all active AI Actions and prompts
 
 ```
-branchly-app_list_tools(active=true)
-branchly-app_list_prompts(is_active=true)
+branchly_list_tools(active=true)
+branchly_list_prompts(is_active=true)
 ```
 
 Read the chat prompts (routing + output) separately:
 
 ```
-branchly-app_list_prompts(prompt_type="chat", is_active=true)
+branchly_list_prompts(prompt_type="chat", is_active=true)
 ```
 
 ### 3b. Check each AI Action against the routing prompt
@@ -224,7 +224,7 @@ Misplacing instructions (e.g., putting response formatting in the Prompt Persona
 Update AI Action descriptions to be **MECE** (mutually exclusive, collectively exhaustive) — minimal overlap between actions so the routing agent can decide deterministically:
 
 ```
-branchly-app_update_tool(
+branchly_update_tool(
   tool_id="...",
   description="Updated description that clearly scopes when this action fires"
 )
@@ -233,7 +233,7 @@ branchly-app_update_tool(
 Update the routing prompt (Prompt Persona) when trigger conditions are missing or wrong:
 
 ```
-branchly-app_create_prompt(
+branchly_create_prompt(
   type="chat",
   subtype="routing_instructions",
   prompt="<updated routing prompt text>"
@@ -249,7 +249,7 @@ branchly-app_create_prompt(
 ### 4a. Check data source status
 
 ```
-branchly-app_list_data_sources()
+branchly_list_data_sources()
 ```
 
 Look for:
@@ -275,7 +275,7 @@ Look for:
 Nodes older than 3 months from dynamic sources (API, webcrawler, file upload, helpspace, custom crawler) may be stale:
 
 ```
-branchly-app_list_nodes(
+branchly_list_nodes(
   sort_parameters=[{"field": "updated_at", "direction": "asc"}],
   limit=10
 )
@@ -305,9 +305,9 @@ After each fix:
 
 1. **Re-read** the updated entity to confirm the change landed:
    ```
-   branchly-app_read_node(node_id="...")
-   branchly-app_read_tool(tool_id="...")
-   branchly-app_list_prompts(is_active=true)
+   branchly_read_node(node_id="...")
+   branchly_read_tool(tool_id="...")
+   branchly_list_prompts(is_active=true)
    ```
 
 2. **Check for side effects** — does this fix affect other nodes/tools/prompts?
@@ -322,11 +322,11 @@ After each fix:
 
 | Problem | Fix layer | Tool |
 |---|---|---|
-| Missing information | Add KB node | `branchly-app_create_node` |
-| Retrieval ranking | score_boost, node enrichment | `branchly-app_update_node` |
-| Noisy indexed content | Crawler config | `branchly-app_update_data_source` |
-| Wrong AI Action trigger | Routing prompt (Prompt Persona) | `branchly-app_create_prompt` (subtype: `routing_instructions`) |
-| Wrong tone/format | Output prompt | `branchly-app_create_prompt` (subtype: `output_instructions`) |
-| AI Action never fires | Action description + routing | `branchly-app_update_tool` + `branchly-app_create_prompt` |
+| Missing information | Add KB node | `branchly_create_node` |
+| Retrieval ranking | score_boost, node enrichment | `branchly_update_node` |
+| Noisy indexed content | Crawler config | `branchly_update_data_source` |
+| Wrong AI Action trigger | Routing prompt (Prompt Persona) | `branchly_create_prompt` (subtype: `routing_instructions`) |
+| Wrong tone/format | Output prompt | `branchly_create_prompt` (subtype: `output_instructions`) |
+| AI Action never fires | Action description + routing | `branchly_update_tool` + `branchly_create_prompt` |
 
 **Principle: Fix the lowest layer possible. A retrieval fix shouldn't require a prompt change. A content fix shouldn't require a score boost.**
