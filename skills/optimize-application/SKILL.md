@@ -35,7 +35,15 @@ Routing contract    → Bot uses the right tool for the right intent
 
 ## Step 1 — Triage: Classify the Failure
 
-Start by pulling recent sessions with problematic answer types:
+Start by understanding which embed surfaces are driving traffic:
+
+```
+branchly_get_active_sessions_by_embed(time_filter="last_30_days")
+```
+
+This shows a time series broken down by embed type (chat, chat_widget, navigator, search_interface, voice, api). Use it to prioritize which surface to optimize first.
+
+Then pull recent sessions with problematic answer types:
 
 ```
 branchly_read_sessions(
@@ -63,6 +71,20 @@ branchly_read_session_detail(session_id="...")
 
 > **Never assume content is missing until you've confirmed the retriever had nothing useful to return.**
 
+### 1b. Correct misclassified answer types
+
+During triage you may find sessions where the `answer_type` is wrong — e.g. `no_knowledge` when the bot actually answered, or `outside_scope` for an in-scope question. Use:
+
+```
+branchly_update_chat_request_analytics(
+  chat_request_id="...",
+  answer_type="complete",
+  sentiment="positive"
+)
+```
+
+Fields you can update: `summary`, `tags`, `answer_type`, `sentiment`, `classification_topic_id`, `classification_intent_id`. Only provided fields are changed.
+
 ---
 
 ## Step 2 — Audit Retrieval Quality
@@ -81,6 +103,12 @@ Sample several nodes from the data source that returned low-quality results:
 ```
 branchly_list_nodes(data_source_ids=["<ds-id>"], limit=10)
 branchly_read_node(node_id="...")
+```
+
+You can also search the knowledge base by content to find relevant nodes:
+
+```
+branchly_list_nodes(query="user's search terms", locale="de", limit=10)
 ```
 
 Look for: navigation menus, footer links, cookie banners, repeated header text, legal boilerplate embedded in content.
@@ -164,7 +192,17 @@ branchly_update_tool(
 
 ### 2f. Content gap — genuine missing information
 
-If after all checks, the content truly doesn't exist:
+Before concluding a content gap, search the knowledge base to confirm the content truly doesn't exist:
+
+```
+branchly_list_nodes(
+  query="the topic the user asked about",
+  locale="de",
+  limit=10
+)
+```
+
+If after all checks the content truly doesn't exist:
 - Inform the user clearly: *"This topic isn't covered in your knowledge base."*
 - Suggest: *"Add a manual FAQ node with a clear title and the answer text. This is the fastest way to cover this gap."*
 
@@ -174,6 +212,8 @@ If after all checks, the content truly doesn't exist:
 
 > **Terminology**: branchly calls configured callable functions **"AI Actions"** in the UI and official docs. The MCP API exposes them via `branchly_list_tools` / `branchly_update_tool`. Both terms refer to the same thing.
 
+> **Interface types**: Prompts are scoped by `interface_type` — `chat`, `navigator`, `search`, or `api`. A `chat` prompt applies to chat/chat_widget/voice embeds, a `navigator` prompt to search embeds, a `search` prompt to search_interface embeds, and an `api` prompt to API embeds. Always specify `interface_type` when listing or creating prompts to target the right surface.
+
 ### 3a. Read all active AI Actions and prompts
 
 ```
@@ -181,10 +221,16 @@ branchly_list_tools(active=true)
 branchly_list_prompts(is_active=true)
 ```
 
-Read the chat prompts (routing + output) separately:
+Read the chat prompts (routing + output) for a specific interface:
 
 ```
-branchly_list_prompts(prompt_type="chat", is_active=true)
+branchly_list_prompts(prompt_type="chat", interface_type="chat", is_active=true)
+```
+
+For search-answering prompts, use the appropriate interface type:
+
+```
+branchly_list_prompts(prompt_type="search_answering", interface_type="search", is_active=true)
 ```
 
 ### 3b. Check each AI Action against the routing prompt
@@ -236,11 +282,25 @@ Update the routing prompt (Prompt Persona) when trigger conditions are missing o
 branchly_create_prompt(
   type="chat",
   subtype="routing_instructions",
+  interface_type="chat",
   prompt="<updated routing prompt text>"
 )
 ```
 
-> `create_prompt` automatically deactivates the previous active prompt of the same type/subtype.
+Update the output prompt for the same interface:
+
+```
+branchly_create_prompt(
+  type="chat",
+  subtype="output_instructions",
+  interface_type="chat",
+  prompt="<updated output prompt text>"
+)
+```
+
+> `create_prompt` automatically deactivates the previous active prompt of the same type/subtype/interface_type.
+>
+> **Required `interface_type` by prompt type**: `chat` prompts require `interface_type` of `chat` or `api`. `search_answering` prompts require `interface_type` of `navigator`, `search`, or `api`. `suggested_questions` and `chat_evaluation` prompts do not require `interface_type`.
 
 ---
 
@@ -307,7 +367,7 @@ After each fix:
    ```
    branchly_read_node(node_id="...")
    branchly_read_tool(tool_id="...")
-   branchly_list_prompts(is_active=true)
+   branchly_list_prompts(prompt_type="chat", interface_type="chat", is_active=true)
    ```
 
 2. **Check for side effects** — does this fix affect other nodes/tools/prompts?
@@ -325,8 +385,8 @@ After each fix:
 | Missing information | Add KB node | `branchly_create_node` |
 | Retrieval ranking | score_boost, node enrichment | `branchly_update_node` |
 | Noisy indexed content | Crawler config | `branchly_update_data_source` |
-| Wrong AI Action trigger | Routing prompt (Prompt Persona) | `branchly_create_prompt` (subtype: `routing_instructions`) |
-| Wrong tone/format | Output prompt | `branchly_create_prompt` (subtype: `output_instructions`) |
+| Wrong AI Action trigger | Routing prompt (Prompt Persona) | `branchly_create_prompt` (type: `chat`, interface_type: `chat`, subtype: `routing_instructions`) |
+| Wrong tone/format | Output prompt | `branchly_create_prompt` (type: `chat`, interface_type: `chat`, subtype: `output_instructions`) |
 | AI Action never fires | Action description + routing | `branchly_update_tool` + `branchly_create_prompt` |
 
 **Principle: Fix the lowest layer possible. A retrieval fix shouldn't require a prompt change. A content fix shouldn't require a score boost.**
