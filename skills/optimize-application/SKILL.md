@@ -92,9 +92,16 @@ Fields you can update: `summary`, `tags`, `answer_type`, `sentiment`, `classific
 ### 2a. Check for no_knowledge misclassification
 
 If the answer_type is `no_knowledge`, verify whether the knowledge actually existed in the context:
-- Read the session detail and check what documents/tool results were passed to the model
+- Read the session detail, then use `read_chat_request_documents` / `read_chat_request_tool_calls` to inspect the exact context and tool results the model was grounded on
 - If a `search_knowledge_base` tool was called, check what it returned
 - If the topic-relevant content **does exist** in the KB but wasn't retrieved → **retrieval issue**, not a content gap
+
+The request-level IDs are visible in the session's full history. Inspect the actual grounding:
+
+```
+branchly_read_chat_request_documents(chat_request_id="...")
+branchly_read_chat_request_tool_calls(chat_request_id="...")
+```
 
 ### 2b. Check for content noise in nodes
 
@@ -149,6 +156,12 @@ branchly_update_data_source(
 | Signal dilution | Right content buried in noise | Strip noise via `remove_html_elements` |
 | Score competition | Irrelevant keyword-heavy pages win | Apply `score_boost` to high-value nodes |
 | Chunk boundary | Answer split across two chunks | Consolidate into single node or use `parent_context` retrieval |
+
+**Find which nodes are load-bearing before boosting any:** `get_top_cited_sources` ranks the KB nodes most cited in answers, so you know exactly what to surface more often.
+
+```
+branchly_get_top_cited_sources(time_filter="last_30_days")
+```
 
 **Before setting any score_boost, always read the current node first:**
 
