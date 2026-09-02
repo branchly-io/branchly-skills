@@ -35,7 +35,42 @@ downstream.
 
 ---
 
-## Step 1 — Gather the "what users care about" signals
+## Step 1 — Understand the application & its use case
+
+Before pulling analytics, ground yourself in **what this application is and who it
+serves**. Content ideas only make sense in context — a travel site and an e-commerce
+site surface very different opportunities from the same numbers.
+
+Fetch key application context:
+
+```bash
+# Full application configuration (name, embeds, data sources, tools, prompts)
+branchly_get_application()
+
+# What data sources feed the knowledge base (website crawler, docs, helpspace, …)
+branchly_list_data_sources()
+
+# Active AI Actions / tools the bot can call (form, weather, maps, …)
+branchly_list_tools(active=true)
+
+# Active prompts across the interfaces — the persona, routing rules, and output
+# style reveal the intended use case and tone
+branchly_list_prompts(is_active=true)
+```
+
+Read the different prompts (chat routing / persona, output instructions, search,
+navigator) to infer:
+- **What the application is for** — the product/domain, the target audience.
+- **What it is explicitly scoped to** — topics it should and shouldn't answer.
+- **What tools/actions it offers** — CTAs, integrations, contact flows.
+
+Record a one-line summary of the use case; it frames how you interpret the demand
+and gap signals in the next steps (e.g. "travel-destination assistant with a
+contact form and weather action").
+
+---
+
+## Step 2 — Gather the "what users care about" signals
 
 Run these analytics tools to understand demand and where it originates. All use
 `time_filter="last_30_days"` unless the user asks for a different window.
@@ -63,9 +98,9 @@ demand. This is the **demand side** of the prioritization.
 
 ---
 
-## Step 2 — Find missing & misleading content (the "gaps")
+## Step 3 — Find missing & misleading content (the "gaps")
 
-### 2a. Answer-quality health
+### 3a. Answer-quality health
 
 ```bash
 branchly_get_answer_type_distribution(time_filter="last_30_days")
@@ -75,7 +110,7 @@ branchly_get_sentiment_distribution(time_filter="last_30_days")
 A high `no_knowledge` / `outside_scope` / `follow_up_question` share, or rising
 negative sentiment, flags content gaps or confusing answers.
 
-### 2b. What users actually search / ask
+### 3b. What users actually search / ask
 
 ```bash
 branchly_get_top_searches(time_filter="last_30_days", limit=15)
@@ -88,7 +123,7 @@ to see whether it was answered well:
 branchly_read_sessions(search_query="<the search term>", interactions=["chat"], limit=10)
 ```
 
-### 2c. Confirm whether a gap is real (never assume)
+### 3c. Confirm whether a gap is real (never assume)
 
 For any topic that looks missing or poorly answered, verify against the KB before
 flagging it as a gap:
@@ -100,7 +135,7 @@ branchly_list_nodes(query="<topic>", locale="de", limit=10)
 If relevant nodes exist but weren't retrieved → **retrieval/ranking issue**, not a
 content gap. If nothing relevant exists → **genuine content gap**.
 
-### 2d. Inspect the worst sessions for root cause
+### 3d. Inspect the worst sessions for root cause
 
 For `no_knowledge` / `outside_scope` sessions, read the detail and grounding to
 classify the failure:
@@ -117,9 +152,9 @@ failure, or genuine content gap.
 
 ---
 
-## Step 3 — Build the prioritized To-Do list
+## Step 4 — Build the prioritized To-Do list
 
-Combine demand (Step 1) with gaps (Step 2). Score each opportunity on three axes:
+Combine demand (Step 2) with gaps (Step 3). Score each opportunity on three axes:
 
 1. **Demand** — how many sessions/searches/citations point at it (access numbers).
 2. **Gap severity** — is content missing, hard to retrieve, or misleading?
@@ -142,7 +177,7 @@ For each item, output a row with:
 
 ---
 
-## Step 4 — Deliver the report
+## Step 5 — Deliver the report
 
 Produce a **structured Markdown report** (no JSON/CSV unless the user asks):
 
