@@ -132,8 +132,17 @@ flagging it as a gap:
 branchly_list_nodes(query="<topic>", locale="de", limit=10)
 ```
 
-If relevant nodes exist but weren't retrieved → **retrieval/ranking issue**, not a
-content gap. If nothing relevant exists → **genuine content gap**.
+Distinguish three cases from the retrieved node content:
+1. **Genuine content gap:** no relevant node exists anywhere in the KB.
+   → Recommend a new FAQ node or page.
+2. **Thin content / superficial mention:** node(s) exist, but only mention the
+   term as a keyword, partner logo, or passing link without answering the user's
+   actual question (e.g. "Salesforce" listed only in a logos section).
+   → Recommend expanding the existing section or creating a dedicated FAQ.
+3. **Retrieval/ranking issue:** comprehensive, accurate information *does* exist
+   in the KB, but the retriever failed to return it or ranked noise above it.
+   → This is an indexing/retrieval problem, not a content creation task. Flag
+   it separately from content ideas.
 
 ### 3d. Inspect the worst sessions for root cause
 
@@ -162,13 +171,20 @@ Combine demand (Step 2) with gaps (Step 3). Score each opportunity on three axes
 
 Rank by **user impact first** (demand × gap severity), then by effort.
 
-For each item, output a row with:
+For each item, output a row with clear, precise language (avoid ambiguous jargon
+or abbreviations):
+- **Opportunity:** concise name of the topic / question.
+- **Evidence:** spelled-out metrics (e.g. `43 citations in chat, 17 origin sessions, tag rank #2`
+  or `4 repeat searches, 2 no_knowledge sessions`).
+- **Type:** `FAQ node`, `Page edit`, or `New page`.
+- **Recommendation:** concrete, actionable editorial guidance (e.g. *"Add dedicated
+  setup guide and troubleshooting FAQ for Salesforce integration"* rather than vague phrases).
 
 | Priority | Opportunity | Evidence (counts) | Type | Recommendation |
 |---|---|---|---|---|
-| P1 | e.g. "How to integrate with TYPO3" | 6 searches, 2 no_knowledge | FAQ node | Add a manual FAQ node with a direct docs link |
-| P2 | e.g. "Pricing comparison" | top cited source, 40 tags | Page edit | Expand /pricing copy; clarify package tiers |
-| P3 | e.g. "MCP protocol explainer" | trending topic up 3× | New page | Draft a blog post / glossary article |
+| P1 | e.g. "How to integrate with TYPO3" | 6 searches, 2 no_knowledge sessions | FAQ node | Add a manual FAQ node with a direct docs link |
+| P2 | e.g. "Pricing & package comparison" | 47 citations (#2), 54 embed clicks | Page edit | Clarify trial/demo booking on /pricing |
+| P3 | e.g. "MCP integration guide" | 43 citations, #2 trending tag | New page | Create a step-by-step tutorial / integration article |
 
 **Recommendation types map to downstream work:**
 - **FAQ node** → generate FAQ entries for the knowledge base.
@@ -184,7 +200,7 @@ Produce a **structured Markdown report** (no JSON/CSV unless the user asks):
 1. **Coverage** — time window analyzed + what surface(s) (chat, search, …).
 2. **Demand snapshot** — top pages, top cited nodes, top tags, top topics/intents with counts.
 3. **Gap findings** — answer-type/sentiment health + confirmed gaps (with the evidence).
-4. **Prioritized To-Do list** — the table from Step 3, ranked P1 → P3.
+4. **Prioritized To-Do list** — the table from Step 4, ranked P1 → P3.
 5. **Notes** — anything needing a human decision (e.g. "9 soft-404 nodes need a link fix", "sentiment signal is always neutral").
 
 Flag anything that requires a product/editorial decision rather than an autonomous
@@ -198,6 +214,8 @@ create**, not applying config changes.
 
 - **Never call a gap a content gap until you've confirmed the retriever had nothing
   useful** (`list_nodes(query=...)`). A retrieval failure is not a missing page.
+- **Distinguish thin content from full coverage** — a passing brand mention or logo
+  in a node does not answer technical questions.
 - **Distinguish origin pages (`get_top_interaction_sources`) from clicked URLs
   (`get_top_clicked_urls`)** — one says where users came from, the other what they
   clicked through to. Both matter for different recommendations.
@@ -205,3 +223,14 @@ create**, not applying config changes.
   current window against a prior one, not just a single snapshot.
 - **Keep the output human-first** — a directly readable prioritized list is the
   deliverable; machine-readable artifacts are opt-in.
+
+---
+
+## Changelog
+
+### v1.0.0 (2026-09-02)
+- Initial version of the `content-ideas` skill.
+- Added application context gathering (Step 1) to frame domain and use case.
+- Integrated demand signals: interaction sources, clicked URLs, cited sources, tags, trending topics/intents.
+- Added 3-way gap analysis: genuine gaps vs. thin content vs. retrieval failures.
+- Formatted output as a prioritized Markdown To-Do list (P1–P3) with actionable recommendations.
