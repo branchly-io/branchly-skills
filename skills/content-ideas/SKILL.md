@@ -20,10 +20,6 @@ license: MIT
 
 You have access to the branchly MCP server. Use it throughout this workflow.
 
-> **Time filter quirk:** many analytics tools reject the string `"last_7_days"`.
-> Use a preset enum (`last_30_days`, `last_6_months`, …) or an explicit range
-> `"YYYY-MM-DD,YYYY-MM-DD"` (inclusive). Default for this skill is `last_30_days`.
-
 ---
 
 ## Goal
@@ -167,7 +163,6 @@ create**, not applying config changes.
 
 - **Never call a gap a content gap until you've confirmed the retriever had nothing
   useful** (`list_nodes(query=...)`). A retrieval failure is not a missing page.
-- **Respect the time-filter quirk** — use enums or explicit ranges, not `last_7_days`.
 - **Distinguish origin pages (`get_top_interaction_sources`) from clicked URLs
   (`get_top_clicked_urls`)** — one says where users came from, the other what they
   clicked through to. Both matter for different recommendations.
