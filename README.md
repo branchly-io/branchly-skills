@@ -1,6 +1,6 @@
 # branchly-skills
 
-Skills for managing and optimizing [branchly](https://branchly.io) applications.
+Skills for managing, optimizing, and creating content for [branchly](https://branchly.io) applications.
 
 ## Skills
 
@@ -15,15 +15,45 @@ Systematically debug and optimize a branchly application. Covers session triage,
 - "debug my chatbot" / "chatbot retrieval issue"
 - "improve retrieval" / "fix bot responses"
 
+### `content-ideas`
+
+Analyze branchly analytics to generate prioritized website content recommendations (page updates, targeted FAQ question lists, and new article/blog topics). Optimizes website content for AI search and user clarity.
+
+**Triggers when you mention:**
+- "what content should we create" / "content ideas"
+- "which pages/topics to prioritize on our website"
+- "what questions should we add as FAQs"
+- "find content gaps on our website"
+- "improve AI search content" / "what should we write about next"
+
 ## Installation
+
+### Install all skills at once (recommended)
+
+Install all available skills from this repository to your detected AI agents without interactive prompts:
+
+```bash
+npx skills add branchly-io/branchly-skills --all
+```
+
+Or globally across all your projects:
+
+```bash
+npx skills add branchly-io/branchly-skills --all -g
+```
+
+### Install interactively or select specific skills
+
+Install interactively (prompts to pick skills and target agents):
 
 ```bash
 npx skills add branchly-io/branchly-skills
 ```
 
-Or to install a specific skill only:
+Or install a specific skill directly:
 
 ```bash
+npx skills add branchly-io/branchly-skills --skill content-ideas
 npx skills add branchly-io/branchly-skills --skill optimize-application
 ```
 
