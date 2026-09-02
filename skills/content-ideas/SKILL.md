@@ -1,236 +1,218 @@
 ---
 name: content-ideas
 description: |
-  Turn branchly MCP analytics into a prioritized content/optimization To-Do list.
-  Gathers the most-important pages, most-cited KB nodes, tags, topics and intents,
-  then ranks content gaps and opportunities by user impact. The output feeds
-  downstream content work: generating FAQs, updating page copy, or creating new
-  pages (blog posts, articles).
+  Analyze branchly MCP analytics to generate prioritized website content recommendations
+  (page updates, targeted FAQ question lists, and new article/blog topics).
+  Helps website owners and marketing teams optimize their website content for AI search
+  and user clarity. Output feeds downstream skills (e.g. generate-faqs, write-article).
 
   Triggers when user mentions:
   - "what content should we create" / "content ideas"
-  - "which pages/topics to prioritize"
-  - "generate FAQs" / "what questions are users asking"
-  - "find content gaps" / "what is missing in our knowledge base"
-  - "what should we write about next"
+  - "which pages/topics to prioritize on our website"
+  - "what questions should we add as FAQs"
+  - "find content gaps on our website"
+  - "improve AI search content" / "what should we write about next"
 license: MIT
 ---
 
-## Content Ideas Workflow for branchly Applications
+## Website Content Ideas Workflow for branchly Applications
 
-You have access to the branchly MCP server. Use it throughout this workflow.
+Use the branchly MCP server throughout this workflow to analyze real user interactions,
+search queries, and knowledge gaps on the customer's website.
 
 ---
 
 ## Goal
 
-Produce a **prioritized To-Do list** of content/optimization opportunities for a
-branchly application — ranked by real usage signal and by evidence of missing or
-misleading content. The output is a structured Markdown report that a downstream
-process can turn into FAQs, page edits, or new pages (blog posts, articles).
+Produce a **prioritized editorial recommendation report** for website owners and content
+teams. The goal is to identify exactly **what content, sections, FAQs, or new pages**
+should be added or updated on their website to:
+1. Directly answer recurring visitor questions and search intents.
+2. Improve retrieval clarity and semantic visibility for AI Search and chat.
+3. Serve as structured input for downstream content-generation skills (such as `generate-faqs` or article writers).
 
-**Scope:** this skill delivers the prioritized list + a concrete recommendation
-per item. It does **not** draft the actual FAQ/content copy — that happens
-downstream.
+**Scope:** This skill is strictly **analytical and strategic (Read-Only)**. It identifies
+and prioritizes content opportunities and lists specific question sets. It does **not**
+draft the full body text or FAQs itself — that is handled downstream by creation skills.
 
 ---
 
-## Step 1 — Understand the application & its use case
+## Step 1 — Understand the Website Domain & Use Case
 
-Before pulling analytics, ground yourself in **what this application is and who it
-serves**. Content ideas only make sense in context — a travel site and an e-commerce
-site surface very different opportunities from the same numbers.
-
-Fetch key application context:
+Before querying analytics, understand what business/domain this application serves:
 
 ```bash
-# Full application configuration (name, embeds, data sources, tools, prompts)
+# Get overall app name, domains, and interface configuration
 branchly_get_application()
 
-# What data sources feed the knowledge base (website crawler, docs, helpspace, …)
-branchly_list_data_sources()
-
-# Active AI Actions / tools the bot can call (form, weather, maps, …)
-branchly_list_tools(active=true)
-
-# Active prompts across the interfaces — the persona, routing rules, and output
-# style reveal the intended use case and tone
+# Review active prompts to understand the domain, target audience, and scope
 branchly_list_prompts(is_active=true)
 ```
 
-Read the different prompts (chat routing / persona, output instructions, search,
-navigator) to infer:
-- **What the application is for** — the product/domain, the target audience.
-- **What it is explicitly scoped to** — topics it should and shouldn't answer.
-- **What tools/actions it offers** — CTAs, integrations, contact flows.
-
-Record a one-line summary of the use case; it frames how you interpret the demand
-and gap signals in the next steps (e.g. "travel-destination assistant with a
-contact form and weather action").
+From this context, note:
+- The core product / service / organization domain.
+- The primary target audience and website goals.
+- Key existing topics (e.g. e-commerce, SaaS, tourism, customer service).
 
 ---
 
-## Step 2 — Gather the "what users care about" signals
+## Step 2 — Gather Demand & User Engagement Signals
 
-Run these analytics tools to understand demand and where it originates. All use
-`time_filter="last_30_days"` unless the user asks for a different window.
+Pull user activity from the last 30 days (`time_filter="last_30_days"`):
 
 ```bash
-# Pages users were ON when they engaged the embed (origin pages → where content lives)
+# 1. High-traffic interaction pages (where visitors start asking questions)
 branchly_get_top_interaction_sources(time_filter="last_30_days", limit=15)
 
-# URLs users actually clicked from inside the embed (what they found useful)
+# 2. Most-clicked destination URLs (what users find valuable to navigate to)
 branchly_get_top_clicked_urls(time_filter="last_30_days", limit=15)
 
-# KB nodes most cited in answers (what is load-bearing / working)
+# 3. Most-cited knowledge base nodes (which website pages currently carry the load)
 branchly_get_top_cited_sources(time_filter="last_30_days", limit=15)
 
-# Topical breakdown of chat traffic (tags)
+# 4. Top conversational tags and trending topics
 branchly_get_top_tags(time_filter="last_30_days", limit=15)
-
-# Trending topics (subject matter) and intents (user goals)
 branchly_get_trending_classifications(classification_type="topic", time_filter="last_30_days")
-branchly_get_trending_classifications(classification_type="intent", time_filter="last_30_days")
 ```
 
-Capture for each result: the name/URL/vertex, the count, and what it implies about
-demand. This is the **demand side** of the prioritization.
+**What to look for:**
+- **High-Interaction Pages:** Pages that generate a lot of user questions (e.g. `/pricing`, `/product-x`). If visitors on these pages ask many follow-up questions, the page copy is missing essential details.
+- **Top Cited Pages:** The core content assets that answer most queries.
 
 ---
 
-## Step 3 — Find missing & misleading content (the "gaps")
+## Step 3 — Uncover Content Gaps & Search Demand
 
-### 3a. Answer-quality health
+Identify unmet needs and recurring user confusion:
 
+### 3a. Search Queries (Direct User Intent)
 ```bash
+branchly_get_top_searches(time_filter="last_30_days", limit=20)
+```
+Analyze what users type into search bars or chat. Queries that appear repeatedly represent immediate content demand.
+
+### 3b. Unanswered & Low-Confidence Queries
+```bash
+# Check answer distributions for no_knowledge or confusion indicators
 branchly_get_answer_type_distribution(time_filter="last_30_days")
-branchly_get_sentiment_distribution(time_filter="last_30_days")
-```
 
-A high `no_knowledge` / `outside_scope` / `follow_up_question` share, or rising
-negative sentiment, flags content gaps or confusing answers.
-
-### 3b. What users actually search / ask
-
-```bash
-branchly_get_top_searches(time_filter="last_30_days", limit=15)
-```
-
-Top searches are direct evidence of unmet intent. Pair each search with sessions
-to see whether it was answered well:
-
-```bash
-branchly_read_sessions(search_query="<the search term>", interactions=["chat"], limit=10)
-```
-
-### 3c. Confirm whether a gap is real (never assume)
-
-For any topic that looks missing or poorly answered, verify against the KB before
-flagging it as a gap:
-
-```bash
-branchly_list_nodes(query="<topic>", locale="de", limit=10)
-```
-
-Distinguish three cases from the retrieved node content:
-1. **Genuine content gap:** no relevant node exists anywhere in the KB.
-   → Recommend a new FAQ node or page.
-2. **Thin content / superficial mention:** node(s) exist, but only mention the
-   term as a keyword, partner logo, or passing link without answering the user's
-   actual question (e.g. "Salesforce" listed only in a logos section).
-   → Recommend expanding the existing section or creating a dedicated FAQ.
-3. **Retrieval/ranking issue:** comprehensive, accurate information *does* exist
-   in the KB, but the retriever failed to return it or ranked noise above it.
-   → This is an indexing/retrieval problem, not a content creation task. Flag
-   it separately from content ideas.
-
-### 3d. Inspect the worst sessions for root cause
-
-For `no_knowledge` / `outside_scope` sessions, read the detail and grounding to
-classify the failure:
-
-```bash
+# Inspect recent sessions where the bot had no answer or struggled
 branchly_read_sessions(answer_types=["no_knowledge", "outside_scope"], interactions=["chat"], limit=10)
+```
+For flagged sessions, read the user queries:
+```bash
 branchly_read_session_detail(session_id="...")
-branchly_read_chat_request_documents(chat_request_id="...")
-branchly_read_chat_request_tool_calls(chat_request_id="...")
 ```
 
-Classify each into: routing failure, retrieval failure, ranking failure, prompt
-failure, or genuine content gap.
+### 3c. Content Audit against Existing Website Pages
+For recurring searches or unanswered topics, search existing knowledge base nodes to see if the topic is covered:
+```bash
+branchly_list_nodes(query="<search term or topic>", locale="de", limit=10)
+```
+
+Classify the finding:
+- **Missing Topic (Content Gap):** No page on the website covers this topic at all → **New Page / Article needed**.
+- **Thin / Passing Mention:** The keyword exists on a page (e.g. in a logo wall or footer), but there is no explanatory text or paragraph answering the question → **Page Update or FAQ needed**.
+- **High-Volume Ambiguity:** A page exists, but visitors on that page still ask basic questions about the topic → **Targeted FAQ section needed on that page**.
 
 ---
 
-## Step 4 — Build the prioritized To-Do list
+## Step 4 — Formulate Actionable Recommendations
 
-Combine demand (Step 2) with gaps (Step 3). Score each opportunity on three axes:
+Group your findings into three clear editorial packages:
 
-1. **Demand** — how many sessions/searches/citations point at it (access numbers).
-2. **Gap severity** — is content missing, hard to retrieve, or misleading?
-3. **Effort** — FAQ node (low) vs. page edit (medium) vs. new page/blog (high).
+### 1. FAQ Recommendations (Ready for `generate-faqs` skill)
+Identify pages where adding an on-page FAQ accordion or section directly resolves visitor friction.
+For each recommendation, provide:
+- **Target Page URL:** The exact page where the FAQ section should be placed.
+- **List of Specific Questions (3–5 concrete questions):** Exact phrasing of questions users are asking.
+- **Why / Evidence:** Number of searches, interaction count, or unanswered sessions.
 
-Rank by **user impact first** (demand × gap severity), then by effort.
+### 2. Page Content Updates (Copy / Section Enhancements)
+Identify existing pages that need new paragraphs, clearer tables, or added sections.
+For each recommendation, provide:
+- **Target Page URL:** The page that needs improvement.
+- **Missing Information / Topic:** Exactly what paragraph, sub-heading, or explanation to add.
+- **Why / Impact:** What confusion this update prevents for visitors and AI search.
 
-For each item, output a row with clear, precise language (avoid ambiguous jargon
-or abbreviations):
-- **Opportunity:** concise name of the topic / question.
-- **Evidence:** spelled-out metrics (e.g. `43 citations in chat, 17 origin sessions, tag rank #2`
-  or `4 repeat searches, 2 no_knowledge sessions`).
-- **Type:** `FAQ node`, `Page edit`, or `New page`.
-- **Recommendation:** concrete, actionable editorial guidance (e.g. *"Add dedicated
-  setup guide and troubleshooting FAQ for Salesforce integration"* rather than vague phrases).
-
-| Priority | Opportunity | Evidence (counts) | Type | Recommendation |
-|---|---|---|---|---|
-| P1 | e.g. "How to integrate with TYPO3" | 6 searches, 2 no_knowledge sessions | FAQ node | Add a manual FAQ node with a direct docs link |
-| P2 | e.g. "Pricing & package comparison" | 47 citations (#2), 54 embed clicks | Page edit | Clarify trial/demo booking on /pricing |
-| P3 | e.g. "MCP integration guide" | 43 citations, #2 trending tag | New page | Create a step-by-step tutorial / integration article |
-
-**Recommendation types map to downstream work:**
-- **FAQ node** → generate FAQ entries for the knowledge base.
-- **Page edit** → supplement or correct content on an existing page.
-- **New page** → create a blog post / article / glossary page.
+### 3. New Content & Topic Hubs (New Articles / Guides / Pages)
+Identify substantial topics that warrant a dedicated standalone URL (blog post, guide, glossary page).
+For each recommendation, provide:
+- **Proposed Topic / Working Title:** e.g. *"Complete Guide to [Topic]"*.
+- **Target Audience & Core Questions to Cover:** What the article must answer.
+- **Evidence:** Search volume, trending topics, or recurring unanswered inquiries.
 
 ---
 
-## Step 5 — Deliver the report
+## Step 5 — Deliver the Prioritized Markdown Report
 
-Produce a **structured Markdown report** (no JSON/CSV unless the user asks):
+Deliver a structured, human-readable report:
 
-1. **Coverage** — time window analyzed + what surface(s) (chat, search, …).
-2. **Demand snapshot** — top pages, top cited nodes, top tags, top topics/intents with counts.
-3. **Gap findings** — answer-type/sentiment health + confirmed gaps (with the evidence).
-4. **Prioritized To-Do list** — the table from Step 4, ranked P1 → P3.
-5. **Notes** — anything needing a human decision (e.g. "9 soft-404 nodes need a link fix", "sentiment signal is always neutral").
+```markdown
+# Website Content Recommendations & Opportunity Report
 
-Flag anything that requires a product/editorial decision rather than an autonomous
-change. Do not edit prompts, tools, nodes, or crawlers based on this analysis
-unless the user explicitly asks — this skill is about **deciding what content to
-create**, not applying config changes.
+**Domain & Use Case:** [Brief summary of the website and audience]
+**Time Window Analyzed:** [e.g. Last 30 Days]
 
 ---
 
-## Pitfalls
+## 1. Executive Summary & Demand Signals
+- **High-Interaction Hubs:** [Top pages driving visitor questions with counts]
+- **Dominant Search Themes:** [Top user queries and trending topics]
+- **Key Content Gaps:** [Summary of missing or thin topics]
 
-- **Never call a gap a content gap until you've confirmed the retriever had nothing
-  useful** (`list_nodes(query=...)`). A retrieval failure is not a missing page.
-- **Distinguish thin content from full coverage** — a passing brand mention or logo
-  in a node does not answer technical questions.
-- **Distinguish origin pages (`get_top_interaction_sources`) from clicked URLs
-  (`get_top_clicked_urls`)** — one says where users came from, the other what they
-  clicked through to. Both matter for different recommendations.
-- **Trends need a comparison window** — to say a topic is "rising", compare the
-  current window against a prior one, not just a single snapshot.
-- **Keep the output human-first** — a directly readable prioritized list is the
-  deliverable; machine-readable artifacts are opt-in.
+---
+
+## 2. Priority 1 — Targeted FAQ Question Sets (Ready for Downstream FAQ Skill)
+*Use these question sets with the FAQ generation skill to produce structured FAQ accordions.*
+
+### A. Target Page: `https://.../page-path`
+- **Recommended FAQ Questions:**
+  1. *[Specific Question 1]*
+  2. *[Specific Question 2]*
+  3. *[Specific Question 3]*
+- **Evidence:** [e.g. 14 user questions from this page, 5 search queries for "X"]
+- **Editorial Goal:** [e.g. Resolve pricing ambiguity and reduce bounce rate]
+
+---
+
+## 3. Priority 2 — Existing Page Updates (Copy & Section Additions)
+| Target Page URL | Section / Topic to Add | Evidence | Why / Expected Impact |
+|---|---|---|---|
+| `https://...` | [e.g. Add dedicated "Integration Requirements" section] | [e.g. 6 searches, thin coverage] | [e.g. Eliminates repeat compatibility questions] |
+
+---
+
+## 4. Priority 3 — New Content & Topic Hubs (Articles / Blog Posts)
+| Proposed Working Title | Target Keywords / Intent | Core Questions to Answer | Demand Evidence |
+|---|---|---|---|
+| [e.g. "How to Connect X with Y"] | [Keywords] | [Key points] | [e.g. Trending topic, 0 existing coverage] |
+
+---
+
+## 5. Next Steps
+- Pass the FAQ question lists to the `generate-faqs` skill for copy generation.
+- Review page update recommendations with the content/marketing team.
+```
+
+---
+
+## Pitfalls to Avoid
+
+- **Do not recommend RAG/crawler/prompt fixes:** This skill is for website copy and content strategy. Technical bot configuration belongs in `optimize-application`.
+- **Do not draft vague placeholders:** Provide exact, realistic user questions (e.g. *"Do you support self-hosted instances?"* not *"Technical questions"*).
+- **Distinguish origin pages from clicked URLs:** Interaction sources tell you where the user felt the need to ask; clicked URLs tell you what they found useful.
+- **Filter development traffic:** Ignore or flag test domains/localhost URLs if present in interaction metrics.
 
 ---
 
 ## Changelog
 
+### v1.1.0 (2026-09-02)
+- Refocused skill exclusively on **Website Content Strategy & AI Search Optimization** for website owners.
+- Removed internal RAG/crawler troubleshooting (moved to `optimize-application`).
+- Structured recommendations into 3 actionable downstream packages: Target FAQ Lists (for `generate-faqs`), Page Updates, and New Articles.
+- Added structured markdown export format ready for downstream skill chaining.
+
 ### v1.0.0 (2026-09-02)
-- Initial version of the `content-ideas` skill.
-- Added application context gathering (Step 1) to frame domain and use case.
-- Integrated demand signals: interaction sources, clicked URLs, cited sources, tags, trending topics/intents.
-- Added 3-way gap analysis: genuine gaps vs. thin content vs. retrieval failures.
-- Formatted output as a prioritized Markdown To-Do list (P1–P3) with actionable recommendations.
+- Initial version.
