@@ -53,9 +53,7 @@ From this context, establish your **thematic scope boundary**:
 - The core product / service / organization domain.
 - The primary target audience and website goals.
 - Key existing topics (e.g. e-commerce, SaaS, tourism, customer service).
-- **Explicit out-of-scope boundaries:** What topics the website does *not* cover (e.g. general knowledge, external trivia, weather, competitor comparisons, off-topic requests).
-
-> ⚠️ **Strict Scope Filter:** Every recommendation generated later **must align with this use case and business domain**. If users ask off-topic questions (e.g. sports scores, general coding help on a tourism site, stock prices), treat them as **irrelevant noise and ignore them**. Do not recommend creating website content for out-of-scope inquiries.
+- Ignore off-topic questions (e.g. general coding help on a tourism site). Do not recommend creating website content for out-of-scope inquiries.
 
 ---
 
@@ -202,7 +200,7 @@ Deliver a structured, human-readable report:
 
 ## Pitfalls to Avoid
 
-- **Ignore out-of-scope & off-topic noise:** Never recommend content for queries that fall outside the website's business domain (e.g. sports, general trivia, stock prices, or prompt injections). Filter them out during Step 3.
+- **Ignore out-of-scope & off-topic noise:** Never recommend content for queries that fall outside the website's business domain (e.g. sports, general trivia, or prompt injections). Filter them out during Step 3.
 - **Do not recommend RAG/crawler/prompt fixes:** This skill is for website copy and content strategy. Technical bot configuration belongs in `optimize-application`.
 - **Do not draft vague placeholders:** Provide exact, realistic user questions (e.g. *"Do you support self-hosted instances?"* not *"Technical questions"*).
 - **Distinguish origin pages from clicked URLs:** Interaction sources tell you where the user felt the need to ask; clicked URLs tell you what they found useful.
