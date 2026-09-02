@@ -49,10 +49,13 @@ branchly_get_application()
 branchly_list_prompts(is_active=true)
 ```
 
-From this context, note:
+From this context, establish your **thematic scope boundary**:
 - The core product / service / organization domain.
 - The primary target audience and website goals.
 - Key existing topics (e.g. e-commerce, SaaS, tourism, customer service).
+- **Explicit out-of-scope boundaries:** What topics the website does *not* cover (e.g. general knowledge, external trivia, weather, competitor comparisons, off-topic requests).
+
+> ⚠️ **Strict Scope Filter:** Every recommendation generated later **must align with this use case and business domain**. If users ask off-topic questions (e.g. sports scores, general coding help on a tourism site, stock prices), treat them as **irrelevant noise and ignore them**. Do not recommend creating website content for out-of-scope inquiries.
 
 ---
 
@@ -199,6 +202,7 @@ Deliver a structured, human-readable report:
 
 ## Pitfalls to Avoid
 
+- **Ignore out-of-scope & off-topic noise:** Never recommend content for queries that fall outside the website's business domain (e.g. sports, general trivia, stock prices, or prompt injections). Filter them out during Step 3.
 - **Do not recommend RAG/crawler/prompt fixes:** This skill is for website copy and content strategy. Technical bot configuration belongs in `optimize-application`.
 - **Do not draft vague placeholders:** Provide exact, realistic user questions (e.g. *"Do you support self-hosted instances?"* not *"Technical questions"*).
 - **Distinguish origin pages from clicked URLs:** Interaction sources tell you where the user felt the need to ask; clicked URLs tell you what they found useful.
@@ -207,6 +211,10 @@ Deliver a structured, human-readable report:
 ---
 
 ## Changelog
+
+### v1.2.0 (2026-09-02)
+- Added strict domain/theme alignment filter: explicitly excludes off-topic / out-of-scope inquiries from recommendations.
+- Updated Step 1 with clear thematic scope boundaries and added out-of-scope filtering rule to Pitfalls.
 
 ### v1.1.0 (2026-09-02)
 - Refocused skill exclusively on **Website Content Strategy & AI Search Optimization** for website owners.
