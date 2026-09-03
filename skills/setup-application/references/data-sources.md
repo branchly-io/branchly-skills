@@ -148,14 +148,52 @@ Allows external CMSs, e-commerce platforms, or databases to push content updates
 
 ---
 
-## 4. MCP Data Source Management Tools
+## 4. Managing Data Sources via MCP
 
-When available in the MCP server:
-- `branchly_list_data_sources()`: Read existing data sources and their status.
-- `branchly_create_data_source(...)`: Programmatically define a new data source.
-- `branchly_update_data_source(data_source_id="...", settings={...})`: Update existing configurations (always send full settings).
-- `branchly_run_data_source(data_source_id="...")`: Trigger an immediate background synchronization.
+Interact with data sources programmatically using the following MCP methods:
 
-> ⚠️ **Asynchronous Execution:** `branchly_run_data_source` triggers an asynchronous background job. Instruct the user to check progress in the branchly dashboard under:  
-> `https://dashboard.branchly.io/{{application_id}}/datasources`  
-> to confirm when the synchronization is complete before running validation queries.
+### 4a. Inspect Existing Sources
+Before making changes, always list active data sources and read their current configuration:
+```bash
+branchly_list_data_sources()
+```
+Examine `type`, `last_run_status`, schedule, and existing `settings`.
+
+### 4b. Create a New Data Source
+When introducing a new ingestion pipeline (e.g. an OpenAPI integration or a secondary crawler):
+```python
+branchly_create_data_source(
+    name="Product Documentation",
+    type="website_crawler",
+    schedule="0 3 * * 1",  # Weekly Monday 03:00 UTC
+    settings={...},  # Full settings schema for the given type
+)
+```
+
+### 4c. Update Data Source Settings
+When updating crawler selectors, sync schedules, or template mappings, remember that **`settings` requires the complete object** (partial settings are not merged):
+```python
+# 1. Inspect current settings first
+sources = branchly_list_data_sources()
+target = next(s for s in sources["items"] if s["name"] == "Main Website")
+
+# 2. Re-apply the full settings payload with your modifications
+branchly_update_data_source(
+    data_source_id=target["id"],
+    settings={
+        **target["settings"],
+        "remove_html_elements": "<updated comma-separated selectors>",
+        "max_pages_per_crawl": 20,
+    },
+)
+```
+
+### 4d. Trigger Synchronization & Monitor Progress
+Triggering a sync runs an **asynchronous background crawler / ingestion job**:
+```python
+branchly_run_data_source(data_source_id="<data-source-uuid>")
+```
+
+Because indexing and embedding generation happen in the background:
+- Inform the user: *"Data source sync initiated in the background. You can track progress live in the branchly dashboard under your Data Sources tab (`https://dashboard.branchly.io/<application_id>/datasources`)."*
+- Wait for the job to complete in the dashboard before testing retrieval or running validation queries.
