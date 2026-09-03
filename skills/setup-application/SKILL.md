@@ -133,15 +133,26 @@ branchly strictly decouples routing logic from response formatting. Refer to `re
 
 Align callable tools with the routing prompt. Refer to `references/prompt-and-tool-templates.md`:
 1. **Audit Tools:** Run `branchly_list_tools(active=true)`.
-2. **Tune Knowledge Base Retriever (`retrieve_documents`):**
+2. **Explicitly Assign Agent Types (`agents` field):**
+   - ⚠️ **Critical Requirement:** Tools/AI Actions must be explicitly activated for specific **agent types**. Not all tools can be used by all agents.
+   - Without the corresponding agent type in `agents`, the tool will not be visible or callable in that interface/execution context.
+   - Core Agent Types:
+     - `chat_routing`: Used by the Chat & Chat Widget routing agent. All conversational callable tools (forms, links, APIs, KB) require this.
+     - `search_answer`: Used by Search Interface answer generation. Primarily for knowledge base search (`retrieve_documents`).
+     - `form_answer`: Used by Smart AI Forms to answer routine user questions before ticket submission (e.g. `retrieve_documents`, `get_weather`).
+     - `form_routing`: Used by Smart AI Forms to route inquiries to departments (`form`).
+3. **Tune Knowledge Base Retriever (`retrieve_documents`):**
    - Ensure `rerank: true` for semantic ranking precision.
    - Set `document_limit_default: 20` and `retrieval_method: "default"` (or `"parent_context"`).
-3. **Configure Lead Capture / Contact Form (`form`):**
+   - Ensure `agents` includes `["chat_routing", "form_answer", "search_answer"]`.
+4. **Configure Lead Capture / Contact Form (`form`):**
    - Define field schemas (`name`, `email`, `message`) and configure `notification_email`.
    - Set descriptive action description so the router triggers it deterministically.
-4. **Configure Dynamic Web Page Reader (`web_page_reader`):**
+   - Ensure `agents` includes `["chat_routing", "form_routing"]`.
+5. **Configure Dynamic Web Page Reader (`web_page_reader`):**
    - Link to specific URLs with dynamic content (e.g. today's live schedule, status page).
-5. **Create Tools:** Use `branchly_create_tool` if creating new AI actions, or `branchly_update_tool` for existing tools.
+   - Set `agents` to `["chat_routing"]`.
+6. **Create / Update Tools:** Use `branchly_create_tool` if creating new AI actions (passing `agents`), or `branchly_update_tool` for existing tools. Verify tool descriptions are strictly MECE.
 
 ---
 
@@ -200,15 +211,14 @@ If any validation queries fail:
 Load `references/embeds-and-production.md`.
 
 1. **Health Check:** Re-read `branchly_get_application()`, `branchly_list_prompts(is_active=true)`, and `branchly_list_tools(active=true)` to confirm all changes landed.
-2. **Advanced Analytics & Settings Review:** Verify application configuration in `references/embeds-and-production.md`:
-   - Retrieval Customization: Check custom boosting (`custom_boosting`) and time-based datetime reranking (`datetime_reranking`).
-   - Classification Mode: Ensure `classification_mode="active"` for topic/intent tracking.
-   - Follow-Up Questions: Set `follow_up_actions=true/false` based on user preference.
-   - Cross-Lingual Adaptation: Configure `use_browser_locale=true/false` based on international visitor requirements.
-   - Journey Tracking: Enable rules for anchor tags (`<a>`), buttons (`<button>`), and custom conversion tags (`data-branchly`).
+2. **Present Optional Post-Launch Enhancements:** Briefly mention available optional enhancements to the user (see `references/embeds-and-production.md` Section 2) as additional options that can improve performance, analytics, or UX down the road, but are not required for v1:
+   - Retrieval Customization: Custom boosting (`custom_boosting`) and time-based reranking (`datetime_reranking`).
+   - Classification Mode: Topic and intent tracking (`classification_mode="active"`).
+   - Follow-Up Questions: Context-aware suggestion pills (`follow_up_actions=true`).
+   - Cross-Lingual Adaptation: Browser language UI translation (`use_browser_locale=true`).
+   - Interaction Tracking: Click tracking for anchor tags (`<a>`), buttons (`<button>`), and custom conversion tags (`data-branchly`).
 3. **Deliver Embed Snippets:** Provide the user with exact `<script>` and `<div>` snippets for their chosen interface.
 4. **Production Reminders:**
    - **Switch Environment to Production:** In dashboard Settings > General, switch status from `development` to `production`.
    - Ensure the host domain is registered under `embed_location` in branchly Application Settings.
    - Whitelist `*.branchly.io` in the website Content Security Policy (CSP).
-   - Brand convention: Always write the platform name lowercase `"branchly"`.

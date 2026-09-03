@@ -15,14 +15,13 @@ The docs own the exact embed markup and the full setting-by-setting descriptions
 
 ## 1. Embed Snippets — get them from the docs / dashboard
 
-For every interface (Chat Widget, Inline Chat, Search, Form, Navigator), fetch the exact `<script>` + container markup from **[how-to-embed](https://docs.branchly.io/docs/how-to-embed)** — or, better, copy the snippet straight from the **Dashboard > User Interface** so the token/`src` are correct for the app.
+For every interface (Chat Widget, Inline Chat, Search, Form), fetch the exact `<script>` + container markup from **[how-to-embed](https://docs.branchly.io/docs/how-to-embed)** — or, better, copy the snippet straight from the **Dashboard > User Interface** so the token/`src` are correct for the app.
 
 **Current embedding surface (docs):**
 - **Chat Widget** — floating bubble (`branchly-chat-widget-container`); also available as a standalone `<branchly-chat-widget>` custom element.
 - **Chat** — inline page embed (`branchly-chat-embed-container`).
 - **Search Interface** — `branchly-search-interface-container`, with `data-view-mode="search-button"` (modal) or `"inline"`; a custom trigger button can be created with `data-branchly-search-trigger`.
 - **Form** — `branchly-form-container`.
-- **Navigator** — `branchly-embed-container`.
 
 > ⚠️ The docs — not this file — are the source of truth for script URLs and attributes. Always fetch the current markup from the docs or dashboard; don't copy markup from other sources that may be outdated.
 

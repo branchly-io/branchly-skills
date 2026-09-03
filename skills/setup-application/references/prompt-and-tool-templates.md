@@ -148,15 +148,17 @@ Connect an external MCP server to give the branchly AI agent direct access to cu
 
 ### Agent type (`agents` field) — must be specified on every tool payload
 
-Every tool carries an **`agents`** field listing which **agent type(s)** the tool is exposed to. Without the correct agent assignment, the tool will not be available to the relevant agent (e.g. a chat-only tool won't fire during search/Form answers, or a tool missing `chat_routing` won't be called in chat).
+Every tool carries an **`agents`** field listing which **agent type(s)** the tool is exposed to. Tools/AI Actions must be explicitly activated for specific agents — **not all tools can or should be used for all agents**.
+
+Without the correct agent assignment, the tool will not be available in that specific agent context (e.g. a tool missing `chat_routing` won't be called during chat conversations, while only specific retrieval/answer tools belong in `search_answer` or `form_answer`).
 
 Known agent types:
 
 | Agent type | Runs in | Typical tool assignment |
 |---|---|---|
-| `chat_routing` | Chat & Chat Widget (routing/orchestration) | **All** callable tools |
-| `search_answer` | Search interface (answer generation) | `retrieve_documents` (KB search) |
-| `form_answer` | Form (agent answering routine questions with tool context) | `retrieve_documents`, `get_weather`, and any tool the Form agent should use |
+| `chat_routing` | Chat & Chat Widget (routing/orchestration) | **All** conversational callable tools |
+| `search_answer` | Search interface (answer generation) | `retrieve_documents` (KB search only; action/form tools cannot run in search answering) |
+| `form_answer` | Form (agent answering routine questions with tool context) | `retrieve_documents`, `get_weather`, and information-lookup tools |
 | `form_routing` | Form (smart-routing submitted requests to departments) | `form` |
 
 Reference assignments (from a production app):
