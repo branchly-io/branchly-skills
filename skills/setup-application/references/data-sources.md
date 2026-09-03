@@ -40,6 +40,19 @@ The field-level crawler schema (crawler_type, urls, globs, `unavailable_source_p
 - **Static / semi-static knowledge** (product manuals, company info, documentation, FAQs) → ingest into the Knowledge Base via a scheduled data source.
 - **Dynamic real-time data** (today's live schedule, current inventory, live status) → do **not** rely on crawler re-syncs. Configure a run-time AI Action instead: `web_page_reader`, `api`, or `mcp_server`, linked directly to the live URL/selector.
 
+### 2d. URL glob patterns (`exclude_url_globs` / `include_url_globs`)
+
+Globs are how you keep irrelevant paths out of (or restrict paths into) a crawl. What the docs do not spell out, learned from [Apify's Website Content Crawler input schema](https://apify.com/apify/website-content-crawler/input-schema#excludeUrlGlobs):
+
+- **Globs match the page's absolute URL** (`https://<domain>/...`), not a bare path token. Always prefix globs with scheme + host (`https://<domain>/…`), otherwise they are fragile or silently match nothing.
+- **`*` matches any run of characters except `/`** — it never crosses a path separator. To match "this slug at any depth under the domain", use `**/`, i.e. `https://<domain>/**/warenkorb*`.
+- **`**` matches any characters including `/`** — it spans directory levels. `https://<domain>/blog/**` matches both `…/blog/post` and `…/blog/category/post`.
+- **Exclude globs only apply to links discovered on crawled pages — Start URLs are always crawled, regardless of the exclude list.** This is exactly why a sitemap Start URL (or a bare root domain) punches through `exclude_url_globs`: sitemap pages are enqueued as Start URLs and bypass the filter (see the ⚠️ sitemap pitfall in SKILL.md). Filtering has to happen at Start-URL selection too, not only in the globs.
+- **Prefer surgical, host-qualified globs over bare substring tokens.** A broad `*shop*`-style glob matches the token anywhere and can collide with wanted content (e.g. a real `regional-products-where-to-shop-in-ellmau` guide). Anchor to the exact path: `https://<domain>/**/warenkorb*`, `https://<domain>/**/agb*`. Validate candidate globs against the site's sitemap URL list with a glob matcher (`*` as non-slash, `**` as any) before writing them.
+- **`include_url_globs` works the same way** — it also affects only links found on pages, not Start URLs. Combined with exclude globs you can whitelist a specific area under a broad Start URL; if you want a page crawled that matches exclude globs, list it explicitly in `start_urls`.
+
+The config example below uses host-qualified `**/` globs per these rules.
+
 ---
 
 ## 3. Detailed Webcrawler Config Example
@@ -75,15 +88,16 @@ branchly_update_data_source(
         "max_crawl_depth": 3,        # Low initial depth → scale up after verification
         "ignore_errors": True,
         "ignore_canonical_url": False,
-        # Exclude functional / non-content paths
+        # Exclude functional / non-content paths.
+        # Globs match ABSOLUTE URLs; `*` does not cross `/`, so anchor to host and
+        # use `**/` to reach a slug at any depth (see section 2d).
         "exclude_url_globs": [
-            "*/404",
-            "*/404/*",
-            "*/404.html",
-            "*/cart*",
-            "*/checkout*",
-            "*/account*",
-            "*/login*"
+            "https://<domain>/**/404",
+            "https://<domain>/**/404.html",
+            "https://<domain>/**/cart*",
+            "https://<domain>/**/checkout*",
+            "https://<domain>/**/account*",
+            "https://<domain>/**/login*"
         ],
         # Remove site-wide elements (anything appearing on multiple pages) that pollute retrieval
         "remove_html_elements": "footer, div.footer, #footer, header, div.pageheader, #pageheader, script, style, noscript, svg, nav, .nav, #nav, .navigation, .breadcrumb, [role=\"alert\"], [role=\"banner\"], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"region\"][aria-label*=\"skip\" i], [aria-modal=\"true\"], #branchly-chat-widget-container, #branchly-embed-container, #branchly-chat-embed-container, #branchly-search-interface-container, .cookie-banner, #cookie-banner",
