@@ -120,6 +120,14 @@ branchly_list_nodes(query="user's search terms", locale="de", limit=10)
 
 Look for: navigation menus, footer links, cookie banners, repeated header text, legal boilerplate embedded in content.
 
+To quantify the noise and derive the selectors to strip, run the bundled helper script (pure Python stdlib, no packages needed) on the raw node HTML:
+
+```
+python3 scripts/analyze_node_noise.py <node_dump.json> --phrases "<key body phrase>"
+```
+
+It reports per-node clean-vs-raw text ratios, ranks site-wide boilerplate class tokens (the `[class*="..."]` selectors to append to `remove_html_elements`), and verifies your key body phrases survive stripping (over-strip guard). It also accepts raw HTML files, so you can validate selectors on a page before triggering a re-crawl.
+
 **If found → fix at the crawler config level:**
 
 > ⚠️ **Settings require the full object.** `website_crawler` requires `urls` and other fields — you cannot send only `remove_html_elements`. Always read first, then send the complete settings with your change merged in.

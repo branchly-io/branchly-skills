@@ -99,15 +99,19 @@ branchly_update_data_source(
 ## 4. Noise-Removal Selectors (our default set)
 
 > **Operational loop for tuning selectors on a new site:** see
-> `scripts/analyze_crawler_noise.py`. Dump the ingested node HTML via
+> `scripts/analyze_node_noise.py`. Dump the ingested node HTML via
 > `branchly_list_nodes(data_source_ids=[...])` (persistent output lands as a JSON
 > spillover file), then run:
 > ```
-> uv run --with beautifulsoup4 python scripts/analyze_crawler_noise.py <node_dump.json>
+> python3 scripts/analyze_node_noise.py <node_dump.json> --phrases "<key body phrase>"
 > ```
-> It reports clean-vs-raw text ratios, residual noise-mark counts, whether key body
-> phrases survive stripping, and ranked residual `class` tokens on link elements —
-> the exact new `[class*="..."]` selectors to append to `remove_html_elements`.
+> It is pure Python stdlib (no packages, no uv needed). It reports per-node
+> clean-vs-raw text ratios, ranks class tokens that appear site-wide with their
+> text volume (the exact new `[class*="..."]` selectors to append to
+> `remove_html_elements`), and checks that your key body phrases survive
+> stripping (over-strip guard). It also works on raw HTML files or piped HTML,
+> so you can pre-check selectors on a page before the first crawl. Never strip
+> hashed `-module` wrapper tokens — they wrap the real body content.
 > Iterate: extend selectors → re-sync → re-dump → re-run, until no noise remains.
 
 The docs describe the `remove_html_elements` mechanism but do not publish a canonical selector list. Use this list as a starting point:
