@@ -197,12 +197,15 @@ If any validation queries fail:
 Load `references/embeds-and-production.md`.
 
 1. **Health Check:** Re-read `branchly_get_application()`, `branchly_list_prompts(is_active=true)`, and `branchly_list_tools(active=true)` to confirm all changes landed.
-2. **Advanced Analytics & Tracking Review:** Verify application analytics settings in `references/embeds-and-production.md`:
-   - Active Topic/Intent classification (`classification_mode="active"`).
-   - Dynamic follow-up question pills (`follow_up_actions=true`).
-   - Journey tracking rules for anchor tags (`<a>`), buttons (`<button>`), and custom conversion tags (`data-branchly`).
+2. **Advanced Analytics & Settings Review:** Verify application configuration in `references/embeds-and-production.md`:
+   - Retrieval Customization: Check custom boosting (`custom_boosting`) and time-based datetime reranking (`datetime_reranking`).
+   - Classification Mode: Ensure `classification_mode="active"` for topic/intent tracking.
+   - Follow-Up Questions: Set `follow_up_actions=true/false` based on user preference.
+   - Cross-Lingual Adaptation: Configure `use_browser_locale=true/false` based on international visitor requirements.
+   - Journey Tracking: Enable rules for anchor tags (`<a>`), buttons (`<button>`), and custom conversion tags (`data-branchly`).
 3. **Deliver Embed Snippets:** Provide the user with exact `<script>` and `<div>` snippets for their chosen interface.
 4. **Production Reminders:**
+   - **Switch Environment to Production:** In dashboard Settings > General, switch status from `development` to `production`.
    - Ensure the host domain is registered under `embed_location` in branchly Application Settings.
    - Whitelist `*.branchly.io` in the website Content Security Policy (CSP).
    - Brand convention: Always write the platform name lowercase `"branchly"`.
