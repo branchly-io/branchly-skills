@@ -90,10 +90,6 @@ branchly_create_prompt(
     prompt="""You are a customer service assistant for {{company_name}}.
 - Tone: {{tone_description}} (e.g. professional, friendly, and concise).
 - Brand Rules: Always write the brand name correctly as "{{brand_name}}". Always write lowercase "branchly" when referring to the platform.
-- Formatting:
-  - Respond in clean GitHub-flavored markdown.
-  - Use bullet points for structured lists.
-  - Mark all URLs in **bold and underlined**.
 - Competitors: Never mention competitors by name. Focus strictly on {{company_name}}'s advantages.
 - Fallback & Escalation:
   - If the retrieved context does not contain the answer, transparently state that you do not know.
@@ -269,6 +265,23 @@ branchly_create_tool(
     },
 )
 ```
+
+### 5g. Additional Built-In AI Actions (Catalog Overview)
+
+branchly provides a rich ecosystem of specialized AI Actions. Refer to the official [AI Actions Documentation](https://docs.branchly.io/docs/AI-actions) for in-depth parameter schemas and setup details:
+
+| Tool Type | Name | Purpose | Key Parameters / Use Case |
+|---|---|---|---|
+| `buttons` | `buttons` | Send up to 3 interactive CTA buttons (link buttons or action buttons) directly in chat responses. | `buttons`: list of button objects (`type="link_button"`, `text`, `url`). Great for "Book Demo", "Call Support", or guided paths. |
+| `calendly` | `calendly` | Allow visitors to schedule meetings and calls directly inside the chat interface. | Requires connected Calendly integration under Settings > Integrations. |
+| `web_search` | `web_search` | Real-time web search for facts outside internal documentation. | `limit`: maximum search results (up to 5). |
+| `node_lookup` | `node_lookup` | Directly retrieve specific high-priority knowledge base nodes without full vector search variance. | `node_ids`: exact node UUIDs to fetch (ideal for deterministic contact/legal lookups). |
+| `weather` | `get_weather` | Real-time weather and temperature for specific locations. | Location inferred from user query or fixed to company premises. |
+| `google_maps_embed` | `google_maps_embed` | Embed interactive Google Maps iframe directly into the chat window. | Requires `GOOGLE_MAPS_API_KEY`; supports travel modes (`driving`, `transit`, etc.). |
+| `regiondo` | `regiondo` | Direct booking of guided tours, tickets, and activities for leisure/tourism websites. | Requires Regiondo `public_key` and `secret_key`. |
+| `venus_knowledge_graph` | `venus_knowledge_graph` | Access regional tourism points of interest, destinations, and public events. | `projects`, `channels`, `domain`. Renders as interactive carousel frontend events. |
+| `bayern_cloud` | `bayern_cloud` | Integrates BayernCloud tourism and regional knowledge data. | Tourism portal integrations in southern Germany/Bavaria. |
+| `send_email` | `send_email` | Direct email forwarding for urgent inquiries (note: prefer `form` for structured input). | `sender_email`: notification recipient address. |
 
 ---
 
