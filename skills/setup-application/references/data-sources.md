@@ -112,7 +112,25 @@ branchly_update_data_source(
 
 ## 4. Noise-Removal Selectors (our default set)
 
+> **Operational loop for tuning selectors on a new site:** see
+> `scripts/analyze_node_noise.py`. Dump the ingested node HTML via
+> `branchly_list_nodes(data_source_ids=[...])` (persistent output lands as a JSON
+> spillover file), then run:
+> ```
+> python3 scripts/analyze_node_noise.py <node_dump.json> --phrases "<key body phrase>"
+> ```
+> It is pure Python stdlib (no packages, no uv needed). It reports per-node
+> clean-vs-raw text ratios, ranks class tokens that appear site-wide with their
+> text volume (the exact new `[class*="..."]` selectors to append to
+> `remove_html_elements`), and checks that your key body phrases survive
+> stripping (over-strip guard). It also works on raw HTML files or piped HTML,
+> so you can pre-check selectors on a page before the first crawl. Never strip
+> hashed `-module` wrapper tokens — they wrap the real body content.
+> Iterate: extend selectors → re-sync → re-dump → re-run, until no noise remains.
+
 The docs describe the `remove_html_elements` mechanism but do not publish a canonical selector list. Use this list as a starting point:
+
+> **Prefer stable CSS selectors.** When extending the list, favor selectors that stay valid across redesigns and deploys: element types (`nav`, `footer`, `aside`), IDs (`#footer`), semantic class/role/aria-attribute selectors (`[role="banner"]`, `[aria-modal="true"]`, `.cookie-banner`). Avoid volatile selectors such as auto-generated hashes, build-output class names, or index/position-based selectors (`div > div:nth-child(3)`) — they break silently on the next deploy and can then under-strip (noise returns) or, worse, over-strip when a hash collides with new content.
 
 ```css
 footer, div.footer, #footer, header, div.pageheader, #pageheader, script, style, noscript, svg, nav, .nav, #nav, .navigation, .breadcrumb, [role="alert"], [role="banner"], [role="dialog"], [role="alertdialog"], [role="region"][aria-label*="skip" i], [aria-modal="true"], #branchly-chat-widget-container, #branchly-embed-container, #branchly-chat-embed-container, #branchly-search-interface-container, .cookie-banner, #cookie-banner, [class*="cookie" i], [id*="cookie" i]

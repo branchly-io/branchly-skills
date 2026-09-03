@@ -6,7 +6,7 @@ Skills for managing, optimizing, and creating content for [branchly](https://bra
 
 ### `optimize-application`
 
-Systematically debug and optimize a branchly application. Covers session triage, retrieval quality, prompt/tool alignment, and data source health.
+Systematically debug and optimize a branchly application. Covers session triage, retrieval quality, prompt/tool alignment, and data source health. Includes `scripts/analyze_node_noise.py` (pure Python stdlib) for quantifying boilerplate noise in crawled node HTML and deriving `remove_html_elements` selectors.
 
 **Triggers when you mention:**
 - "optimize my branchly application"
