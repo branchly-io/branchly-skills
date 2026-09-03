@@ -15,6 +15,17 @@ Systematically debug and optimize a branchly application. Covers session triage,
 - "debug my chatbot" / "chatbot retrieval issue"
 - "improve retrieval" / "fix bot responses"
 
+### `setup-application`
+
+Guide and execute end-to-end setup and configuration for a branchly application. Conducts website research, interviews the user on use case and guardrails, and configures data sources, prompts, AI actions, and knowledge base nodes via MCP.
+
+**Triggers when you mention:**
+- "set up my branchly application" / "setup branchly app"
+- "configure a new branchly chatbot" / "onboard my website to branchly"
+- "create initial prompts and tools for branchly"
+- "help me configure branchly for my domain"
+- "initial branchly configuration"
+
 ### `content-ideas`
 
 Analyze branchly analytics to generate prioritized website content recommendations (page updates, targeted FAQ question lists, and new article/blog topics). Optimizes website content for AI search and user clarity.
@@ -55,6 +66,7 @@ Or install a specific skill directly:
 ```bash
 npx skills add branchly-io/branchly-skills --skill content-ideas
 npx skills add branchly-io/branchly-skills --skill optimize-application
+npx skills add branchly-io/branchly-skills --skill setup-application
 ```
 
 ## Requirements
