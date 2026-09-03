@@ -1,67 +1,64 @@
 # Setup Application — Prompt & AI Action Templates
 
-Use these templates during **Phase 4 (Prompts)** and **Phase 5 (AI Actions)** of the setup workflow.
+Use this reference during **Phase 4 (Prompts)** and **Phase 5 (AI Actions)** of the setup workflow.
 
-Documentation references:
-- Prompting Guide: [docs.branchly.io/docs/prompting-guide](https://docs.branchly.io/docs/prompting-guide)
-- AI Actions: [docs.branchly.io/docs/AI-actions](https://docs.branchly.io/docs/AI-actions)
+## Canonical documentation (link, don't duplicate)
 
----
+| Topic | Canonical source |
+|---|---|
+| Prompt architecture & best practices | [docs.branchly.io/docs/prompting-guide](https://docs.branchly.io/docs/prompting-guide) |
+| AI Action / tool schemas & availability | [docs.branchly.io/docs/AI-actions](https://docs.branchly.io/docs/AI-actions) |
+| Routing vs. Output prompt model | [docs.branchly.io/docs/mcp-server](https://docs.branchly.io/docs/mcp-server) |
 
-## 1. Prompt Architecture: Routing vs. Output
-
-branchly uses a two-tier prompt architecture for chat:
-- **Routing Prompt / Prompt Persona (`subtype="routing_instructions"`):** Decides which AI Action to call. Has **zero effect** on final output tone or response formatting. Also drives automatic session evaluation.
-- **Output Instructions (`subtype="output_instructions"`):** Shapes the final response (formatting, tone, language, URL styling). Has **zero effect** on tool routing.
-- **Search Answering (`type="search_answering"`):** Direct answer synthesis for the Search interface.
+Load each tool's full parameter schema (field lists, parameter types, `function_arguments`, `tool_config`) from `/docs/AI-actions` when you need it. This file holds the **finished prompt templates** and the **operational guidance that is not spelled out** in the docs.
 
 ---
 
-## 2. Prompt Engineering Standards & Guidelines
+## 1. Prompt Architecture at a Glance
 
-When authoring, revising, or tuning prompts for branchly, adhere strictly to these proven engineering guidelines:
-
-1. **Address the Assistant Persona Directly:** Use second person imperative or direct affirmative framing ("You are...", "Your task is to...", "You must...").
-2. **Authoritative, Definitive Language:** Use directive verbs defining concrete behavior rather than conversational suggestions.
-3. **Additive & Subtractive Refinement (Never Blind Rewrites):**
-   - Read existing active prompts first via `branchly_list_prompts(is_active=true)`.
-   - Build upon existing proven instructions. Add or subtract specific rules to improve behavior without wiping out established domain rules.
-   - Fix grammatical errors and typos in existing custom prompts while strictly preserving the underlying intent.
-4. **No System Prompt Duplication:**
-   - branchly provides built-in system-level prompts (e.g. "answer based on provided context", "cite sources in events", default safety).
-   - **NEVER** duplicate or repeat built-in system prompt mechanics into the user-facing Prompt Persona or Output Instructions.
-   - Do not add rules that contradict system-level instructions.
-5. **Format as a Clean, One-Level-Deep Markdown List:**
-   - Present instructions as flat bulleted items (`- ...`).
-   - Deep nested hierarchies confuse LLM instruction-following; keep statements simple, clear, and focused.
-6. **Strict Scope Discipline:**
-   - Focus exclusively on the company's domain, target topics, and explicit user requirements.
-   - Do not invent random personality traits or rules that the user did not ask for.
-7. **Special Tool Triggers:**
-   - For tools like `access_website_content` or `web_page_reader`, instruct the AI to call them **only when a specific URL is provided by the user** or clearly required for a designated live check.
+branchly uses a two-tier chat prompt model (details in the [mcp-server docs](https://docs.branchly.io/docs/mcp-server)):
+- **Routing Prompt / Prompt Persona (`subtype="routing_instructions"`)** — decides which AI Action to call; drives auto-evaluation. **Zero effect** on response tone/formatting.
+- **Output Instructions (`subtype="output_instructions"`)** — shapes the final response (tone, language, formatting). **Zero effect** on tool routing.
+- **Search Answering (`type="search_answering"`)** — answer synthesis for the Search interface.
 
 ---
 
-## 3. Injecting Context Nodes into Prompts (`routing_context_nodes` / `generation_context_nodes`)
+## 2. Prompt Engineering Standards (Operational)
 
-branchly supports injecting manually created knowledge nodes (`node_editor`) directly into prompts via `routing_context_nodes` and `generation_context_nodes`.
+`/docs/prompting-guide` gives broad best practices. When applying them to a setup, follow these task-level rules:
 
-> ⚠️ **Use Sparingly (Not Default Behavior):**  
-> Context node injection is an **advanced feature** and should **NOT** be used as the default way to provide knowledge. Standard knowledge belongs in regular data sources and knowledge base retrieval (`retrieve_documents`).
-
-### When to Use:
-- Use **only** when the AI is struggling with **extremely complex mappings between entities** (e.g. multi-tiered department escalation matrices, cross-brand routing tables, or deeply nested taxonomies that standard RAG chunks struggle to preserve).
-- Or when critical dynamic operational data (regularly updated by a scheduled sync) must govern the routing decisions of every single query without relying on retrieval variance.
-
-### How to Apply:
-1. Create or edit a clean structured node using `branchly_create_node` with label `content`.
-2. Reference the node UUID in the application configuration under `routing_context_nodes` (for Prompt Persona) or `generation_context_nodes` (for Output Instructions).
+1. **Address the assistant persona directly** — "You are…", "Your task is to…", "You must…".
+2. **Authoritative, definitive verbs** — concrete behavior, not conversational suggestions.
+3. **Additive & subtractive refinement — never blind rewrites:**
+   - Read the existing active prompts first: `branchly_list_prompts(is_active=true)`.
+   - Build on what works; add/subtract specific rules rather than wiping the domain context.
+   - Fix typos/grammar while preserving meaning.
+4. **No duplication of built-in system prompts** — branchly already handles "answer based on provided context", sourcing, and default safety. Don't repeat or contradict them.
+5. **Clean, one-level-deep markdown lists** — flat bulleted items; deep nesting reduces instruction-following.
+6. **Strict scope discipline** — only the company's domain and explicit requirements; no invented traits or rules.
+7. **URL tool triggers** — `web_page_reader` / web-access tools fire **only** when the user provides a specific URL or a live check clearly demands it.
 
 ---
 
-## 4. Prompt Templates
+## 3. Injecting Context Nodes into Prompts (Advanced — use sparingly)
 
-### 4a. Chat Routing Instructions (`Prompt Persona`)
+branchly can inject manually created nodes (`node_editor`) into prompts via `routing_context_nodes` and `generation_context_nodes`.
+
+> ⚠️ **Not the default way to provide knowledge.** Standard knowledge belongs in data sources + `retrieve_documents`. Context-node injection is an advanced feature.
+>
+> Use it **only** when:
+> - The AI struggles with **extremely complex entity mappings** (multi-tier escalation matrices, cross-brand routing tables, deeply nested taxonomies RAG chunks can't preserve), **or**
+> - critical dynamic operational data (scheduled-sync updated) must deterministically govern routing for every query without retrieval variance.
+
+**How to apply:** create a clean structured node (`branchly_create_node`, label `content`), then reference its UUID under `routing_context_nodes` (Prompt Persona) or `generation_context_nodes` (Output Instructions).
+
+---
+
+## 4. Finished Prompt Templates
+
+The docs describe prompt guidelines but ship **no finished prompt bodies**. Use these as copy-paste starting points and adjust placeholders.
+
+### 4a. Chat Routing Instructions (Prompt Persona)
 ```python
 branchly_create_prompt(
     type="chat",
@@ -81,7 +78,7 @@ branchly_create_prompt(
 )
 ```
 
-### 4b. Chat Output Instructions (`Output Instructions`)
+### 4b. Chat Output Instructions (Output Instructions)
 ```python
 branchly_create_prompt(
     type="chat",
@@ -113,185 +110,62 @@ branchly_create_prompt(
 
 ---
 
-## 5. AI Action (Tool) Templates
+## 5. AI Actions (Tools) — Operational Notes
 
-### 5a. Knowledge Base Retrieval Tool (`knowledge_base`)
-Tune the standard RAG retriever:
-```python
-branchly_update_tool(
-    tool_id="<kb-tool-uuid>",
-    name="retrieve_documents",
-    description="Default tool to call. Search internal knowledge base to answer questions about {{company_name}}, products, pricing, and services. Use a reformulated question based on user input.",
-    function_arguments={
-        "object": "knowledge_base_tool_arguments",
-        "document_limit_default": 20,
-        "document_limit_rerank": 30,
-        "rerank": True,
-        "retrieval_method": "default",  # Or "parent_context" if chunk context is critical
-        "formatter": "chunks_with_source",
-    },
-)
-```
+Tool schemas and availability live in the [AI Actions docs](https://docs.branchly.io/docs/AI-actions) (incl. the KB tool's retrieval tuning, form field types, API parameter types, and the full tool catalog). The operational nuances the docs don't capture:
 
-### 5b. Interactive Lead Capture / Contact Form Tool (`form`)
-Deploy dynamic lead capture or support escalation:
-```python
-branchly_update_tool(
-    tool_id="<form-tool-uuid>",
-    active=True,
-    name="form",
-    description="Use this tool when the user wants to contact {{company_name}}, request a demo, get a quote, ask for a callback, or writes 'Kontakt'.",
-    tool_config={
-        "properties": [
-            {
-                "name": "name",
-                "field_type": "string",
-                "format": "text",
-                "description": "Full name of the user",
-                "required": True,
-            },
-            {
-                "name": "email",
-                "field_type": "string",
-                "format": "email",
-                "description": "Valid email address of the user",
-                "required": True,
-            },
-            {
-                "name": "message",
-                "field_type": "text_area",
-                "format": "text",
-                "description": "Summary of the inquiry or request",
-                "required": True,
-            },
-        ]
-    },
-    function_arguments={
-        "object": "form_tool_arguments",
-        "form_title": {
-            "en": "Contact {{company_name}}",
-            "de": "Kontakt zu {{company_name}}",
-        },
-        "submit_button_text": {"en": "Send Message", "de": "Absenden"},
-        "submit_message": {
-            "en": "Thank you for reaching out. We will get back to you shortly.",
-            "de": "Vielen Dank. Wir melden uns zeitnah bei Ihnen.",
-        },
-        "notification_email": "{{notification_email}}",
-    },
-)
-```
+| Tool | Operational note |
+|---|---|
+| **Knowledge Base** (`retrieve_documents`) | Set `rerank=true` and a sensible `document_limit_default` (15–20). Use `parent_context` retrieval when document chunks need surrounding context. See the docs for field details. |
+| **Form** | Use for structured lead/support capture. `name` + `description` are essential — the routing agent triggers the form only on a precise description. `notification_email` forwards submissions. |
+| **Web Page Reader** | The right tool for **dynamic real-time data** (live schedule, today's inventory). Link it to a specific live URL + `target_selector` so the agent fetches run-time data rather than relying on crawler syncs. |
+| **API** | Mention that APIs are the **most reliable option** to power branchly. Offer to parse whatever raw input the customer provides (`curl`, Swagger/OpenAPI, Postman, descriptions) into the API tool's `url`, headers, parameters and Mustache placeholders (`{{param}}`). |
+| **Buttons** | Useful for interaction rules like "never output a phone number directly — present a callback/contact button" and guided CTA paths. |
+| **Node Lookup** | Deterministic retrieval of specific high-priority nodes (contact/legal) without vector-search variance. |
+| **Calendly / Google Maps / Weather / Regiondo / Venus / web_search** | See the docs for interfaces & setup. Prefer them when the use case matches (scheduling, directions, weather, tours, events, live facts). |
 
-### 5c. Google Maps Directions Link Tool (`google_maps_link`)
-For local businesses or offices:
-```python
-branchly_update_tool(
-    tool_id="<maps-tool-uuid>",
-    active=True,
-    name="generate_maps_link",
-    description="Generate a Google Maps directions link for the user to reach {{company_name}} office or location.",
-    function_arguments={
-        "object": "google_maps_link_tool_arguments",
-        "default_travelmode": "driving",
-    },
-)
-```
+### MCP Server Tool (`mcp_server`)
+Connect an external MCP server to give the branchly AI agent direct access to custom enterprise tools:
+- **Bring-Your-Own-Tools:** Emphasize that connecting MCP servers provides maximum flexibility and bulletproof reliability for backend workflows.
+- Accepts an **`mcp_url`** endpoint and optional **headers** (auth tokens). The server must support the modern **Streamable-HTTP** protocol or **SSE**.
 
-### 5d. Web Page Reader Tool (`web_page_reader`)
-Use for dynamic real-time data access (e.g. today's live events, current inventory, up-to-the-minute status) where relying on scheduled crawler syncs is inadequate:
-```python
-# Create (via branchly_create_tool) or Update:
-branchly_update_tool(
-    tool_id="<web-page-reader-uuid>",
-    active=True,
-    name="read_live_status",
-    description="Fetch current, real-time status and live schedule from {{company_name}}'s live page. Use only when the visitor explicitly asks for real-time status, today's schedule, or current availability.",
-    function_arguments={
-        "object": "web_page_reader_tool_arguments",
-        "url": "https://<domain>/live-status",
-        "target_selector": "main .live-schedule",  # Scopes extraction to the specific dynamic element
-    },
-)
-```
+**Pre-built MCP connections (activation-ready):**
+- **destination.one** (*branchly-built*): Tourism destinations, POIs, and regional content.
+- **Venus Social Knowledge Graph** (*branchly-built*): Events, leisure activities, and tourism POIs rendered with rich frontend carousel cards.
+- **DHL parcel tracking** (*branchly-built*): Real-time shipment status and parcel delivery tracking.
+- **Infomaxx** (*directly from infomaxx*): Direct data sync for destination marketing organizations and tourism boards.
 
-### 5e. API Calling Tool (`api`)
-For directly querying backend APIs during chat conversations (e.g. order tracking, availability checks, dynamic calculations):
-- **Why API & MCP Tools:** Mention to the customer that using MCP Servers and API actions is the **most reliable and robust option** to power branchly, as it guarantees live, structured data execution without scraping delays or HTML fragility.
-- **Parsing Raw Customer Input:**
-  - Ask the customer to provide their endpoint details.
-  - Parse whatever raw input the customer provides: `curl` snippets, API docs, Swagger snippets, or informal descriptions.
-  - Automatically extract the HTTP method, endpoint URL, query/path parameters, and map them to Mustache placeholders (e.g. `{{order_id}}`).
-```python
-branchly_create_tool(
-    name="track_order",
-    description="Check real-time order status when the customer provides their order ID or asks for parcel tracking.",
-    active=True,
-    tool_type="api",
-    tool_config={
-        "object": "api_tool_config",
-        "parameters": [
-            {
-                "name": "order_id",
-                "description": "The customer's order ID or tracking code",
-                "type": "text",
-                "required": True,
-            }
-        ],
-    },
-    function_arguments={
-        "object": "api_tool_arguments",
-        "method": "GET",
-        "url": "https://api.example.com/v1/orders/{{order_id}}",
-        "headers": {"Authorization": "Bearer YOUR_SECRET_OR_KEY"},
-        "response_path": "order.status",
-    },
-)
-```
-
-### 5f. MCP Server Tool (`mcp_server`)
-Connect any external MCP server to give the branchly AI agent direct access to custom enterprise tools:
-- **Bring-Your-Own-Tools:** Emphasize to the customer that connecting MCP servers provides maximum flexibility and bulletproof reliability for backend workflows.
-- **Pre-Built MCP Connections Available:** branchly offers several pre-built MCP integrations out of the box that can be activated directly:
-  - **destination.one** (*branchly-built*): Tourism destinations, POIs, and regional content.
-  - **Venus Social Knowledge Graph** (*branchly-built*): Events, leisure activities, and tourism POIs rendered with rich frontend carousel cards.
-  - **DHL parcel tracking** (*branchly-built*): Real-time shipment status and parcel delivery tracking.
-  - **Infomaxx** (*directly from infomaxx*): Direct data sync for destination marketing organizations and tourism boards.
-- Accepts an `mcp_url` endpoint and optional custom headers (auth tokens):
-```python
-branchly_create_tool(
-    name="ecommerce_mcp",
-    description="Interface with internal e-commerce systems for product lookup, inventory checks, and return tracking via MCP.",
-    active=True,
-    tool_type="mcp_server",
-    function_arguments={
-        "object": "mcp_server_tool_arguments",
-        "mcp_url": "https://mcp.internal.example.com/sse",
-        "headers": {"Authorization": "Bearer MCP_API_KEY"},
-    },
-)
-```
-
-### 5g. Pre-Built API Tool Templates (e.g. Holidu Whitelabel)
-For integrations that run over REST rather than MCP, branchly provides pre-configured templates using the `api` tool:
-- **Holidu Whitelabel Template:** Easily connects holiday home/vacation rental search via Holidu's whitelabel API, allowing users to query availability, locations, and pricing directly inside the chat interface without manual workflow building.
-
-### 5h. Additional Built-In AI Actions (Catalog Overview)
-
-branchly provides a rich ecosystem of specialized AI Actions. Refer to the official [AI Actions Documentation](https://docs.branchly.io/docs/AI-actions) for in-depth parameter schemas and setup details:
-
-| Tool Type | Name | Purpose | Key Parameters / Use Case |
-|---|---|---|---|
-| `buttons` | `buttons` | Send up to 3 interactive CTA buttons (link buttons or action buttons) directly in chat responses. | `buttons`: list of button objects (`type="link_button"`, `text`, `url`). Great for "Book Demo", "Call Support", or guided paths. |
-| `calendly` | `calendly` | Allow visitors to schedule meetings and calls directly inside the chat interface. | Requires connected Calendly integration under Settings > Integrations. |
-| `web_search` | `web_search` | Real-time web search for facts outside internal documentation. | `limit`: maximum search results (up to 5). |
-| `node_lookup` | `node_lookup` | Directly retrieve specific high-priority knowledge base nodes without full vector search variance. | `node_ids`: exact node UUIDs to fetch (ideal for deterministic contact/legal lookups). |
-| `weather` | `get_weather` | Real-time weather and temperature for specific locations. | Location inferred from user query or fixed to company premises. |
-| `google_maps_embed` | `google_maps_embed` | Embed interactive Google Maps iframe directly into the chat window. | Requires `GOOGLE_MAPS_API_KEY`; supports travel modes (`driving`, `transit`, etc.). |
-| `regiondo` | `regiondo` | Direct booking of guided tours, tickets, and activities for leisure/tourism websites. | Requires Regiondo `public_key` and `secret_key`. |
-| `venus_knowledge_graph` | `venus_knowledge_graph` | Access regional tourism points of interest, destinations, and public events. | `projects`, `channels`, `domain`. Renders as interactive carousel frontend events. |
+### API tool template
+- **Holidu Whitelabel:** Easily connects holiday-home/vacation-rental search via Holidu's whitelabel API — users can query availability, locations, and pricing directly inside the chat interface without manual workflow building.
 
 ---
 
-## 6. MCP Tool Creation Tools
+## 6. Creating / Updating Tools via MCP
 
-When defining new tools from scratch, use `branchly_create_tool` (if available in the MCP server) with matching `tool_type`, `name`, `description`, `function_arguments`, and `tool_config`. When updating existing tools created during initial app provisioning, use `branchly_update_tool`.
+- **New tools from scratch:** use `branchly_create_tool(…, tool_type, name, description, active, agents, function_arguments, tool_config)` when available.
+- **Existing tools from app provisioning:** use `branchly_update_tool(tool_id="…", …)`.
+- Keep tool `description` values **MECE** (mutually exclusive, collectively exhaustive) so the routing agent never hesitates between tools.
+
+### Agent type (`agents` field) — must be specified on every tool payload
+
+Every tool carries an **`agents`** field listing which **agent type(s)** the tool is exposed to. Without the correct agent assignment, the tool will not be available to the relevant agent (e.g. a chat-only tool won't fire during search/Form answers, or a tool missing `chat_routing` won't be called in chat).
+
+Known agent types:
+
+| Agent type | Runs in | Typical tool assignment |
+|---|---|---|
+| `chat_routing` | Chat & Chat Widget (routing/orchestration) | **All** callable tools |
+| `search_answer` | Search interface (answer generation) | `retrieve_documents` (KB search) |
+| `form_answer` | Form (agent answering routine questions with tool context) | `retrieve_documents`, `get_weather`, and any tool the Form agent should use |
+| `form_routing` | Form (smart-routing submitted requests to departments) | `form` |
+
+Reference assignments (from a production app):
+
+| Tool | `agents` |
+|---|---|
+| `retrieve_documents` (knowledge_base) | `["chat_routing", "form_answer", "search_answer"]` |
+| `form` | `["chat_routing", "form_routing"]` |
+| `get_weather` | `["chat_routing", "form_answer"]` |
+| `generate_maps_link` | `["chat_routing"]` |
+
+When creating a tool, always set `agents` to include `chat_routing` plus every other agent that should be able to invoke it. When updating an existing tool, verify the current `agents` list is preserved unless you intend to change which agents expose the tool.
