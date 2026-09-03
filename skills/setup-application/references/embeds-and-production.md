@@ -24,37 +24,39 @@ For every interface (Chat Widget, Inline Chat, Search, Form, Navigator), fetch t
 - **Form** — `branchly-form-container`.
 - **Navigator** — `branchly-embed-container`.
 
-> ⚠️ The docs — not this file — are the source of truth for script URLs and attributes. They have moved (e.g. custom-element + trigger-attribute embedding) and the exact domains differ by interface, so don't copy stale markup.
+> ⚠️ The docs — not this file — are the source of truth for script URLs and attributes. Always fetch the current markup from the docs or dashboard; don't copy markup from other sources that may be outdated.
 
 ---
 
-## 2. Settings to Review Before Launch
+## 2. Optional Enhancements (not required for v1)
 
-Review these in **Application Settings** and set the recommended values. Field-level detail lives in the [settings docs](https://docs.branchly.io/docs/settings).
+The settings below are **optional, mutually independent** features that can improve **performance, analytical value, or UX** once the application is live. They are **not required** to deliver a working v1 application. For an initial setup, the AI agent should **only briefly mention that they exist** (and be able to enable them on request later) — not configure or dwell on them now.
+
+Field-level detail lives in the [settings docs](https://docs.branchly.io/docs/settings).
 
 ### 2a. Retrieval customization & boosting
-- **Custom Boosting:** Set per-node `score_boost` (via `branchly_update_node`) to prioritize high-value content (key landing pages, official FAQs, contact node) — `mode="mult"`, active for `search` + `chat`.
-- **Datetime reranking (`datetime_reranking`):** Enable for news/blogs/fast-moving docs to push `published_date`/`modified_date`-recent content higher.
-- **Record-source reranking (`record_source_reranking`):** Tune title vs. body match weights (e.g. `title_boost: 1.5`, `text_boost: 0.75`).
+- **Custom Boosting:** per-node `score_boost` to prioritize high-value content (key landing pages, FAQs, contact node) — `mode="mult"`, active for `search` + `chat`.
+- **Datetime reranking (`datetime_reranking`):** pushes `published_date`/`modified_date`-recent content higher — useful for news/blogs/fast-moving docs.
+- **Record-source reranking (`record_source_reranking`):** tune title vs. body match weights (e.g. `title_boost: 1.5`, `text_boost: 0.75`).
 
 ### 2b. Classification mode
-- Set **`classification_mode: "active"`** so sessions are clustered into semantic **topics** + **intents** — powers dashboard trends and the weekly digest email.
-- Read trends via `branchly_get_trending_classifications(classification_type="topic"|"intent")`.
+- **`classification_mode: "active"`** clusters sessions into semantic **topics** + **intents** — powers dashboard trends and the weekly digest email. Optional but recommended.
+- It is recommended to provide your own topics/intents beforehand so classifications align with your systems.
 
 ### 2c. Follow-up actions
-- **`follow_up_actions: true` (recommended):** AI adds context-aware follow-up question pills + navigation next-steps (internal links navigate in-frame, external open in new tab).
-- **`false`:** clean answers, no suggestion pills.
+- **`follow_up_actions: true`** adds context-aware follow-up question pills + navigation next-steps (internal links navigate in-frame, external open in new tab).
 
 ### 2d. Cross-lingual adaptation (`use_browser_locale`)
-- **Enable** if your site gets international visitors in languages you haven't fully indexed — branchly localizes UI text to the browser language and falls back to dense multilingual semantic search for unsupported locales.
+- **Enable** for international visitors in languages you haven't fully indexed — branchly localizes UI text to the browser language and falls back to dense multilingual semantic search for unsupported locales.
 - **Disable (default)** for single-language / homogeneous sites or strict `/{lang}/` path segregation (widget matches the page locale).
 - Related: `reply_in_user_language` detects a visitor's *typed* chat language and replies in kind.
 
 ### 2e. Interaction & element tracking
-- **Track page navigation / link clicks** — on, to trace visitor journeys across Docusaurus/docs/marketing layouts.
-- **Anchor & button rules** — capture all clicks on `<a>` and `<button>` globally, or target CSS selectors.
-- **Custom conversion tags** — add `data-branchly="<label>"` to high-value elements (hero CTA, feature cards, pricing tiers).
-- Widget-internal events are auto-excluded from your website analytics.
+- **Anchor & button rules** — capture clicks on `<a>` and `<button>` globally, or target specific CSS selectors (e.g. add-to-cart button).
+- **Custom conversion tags** — `data-branchly="<label>"` on high-value elements (hero CTA, feature cards, pricing tiers).
+- Widget-internal events (click citation/source, follow-up questions, etc.) are auto-captured inside branchly.
+
+> For a v1 setup, none of the above need to be configured. Mention them in one line and offer to enable them later if the user wants the extra performance, analytics, or UX.
 
 ---
 
@@ -64,4 +66,3 @@ Review these in **Application Settings** and set the recommended values. Field-l
 2. **Register Allowed Domains (`embed_location`):** every production + staging domain the widget appears on must be listed under **Website Location**, or the embed fails to initialize (security-restricted).
 3. **Content Security Policy:** if the site enforces CSP, whitelist branchly endpoints (`script-src`/`connect-src`/`frame-src` for the branchly.io embed domains, plus `style-src 'unsafe-inline'`).
 4. **Locale tagging:** ensure `<html lang>` (or container `lang`) matches configured `valid_locales`.
-5. **Brand convention:** always write the platform name lowercase `"branchly"`.
