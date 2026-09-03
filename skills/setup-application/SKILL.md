@@ -32,6 +32,7 @@ Load these specialized references as needed during each phase:
 - `references/data-sources.md` — Crawling best practices, noise removal, WordPress, OpenAPI, PDFs, HelpSpace, and `branchly_run_data_source`.
 - `references/prompt-and-tool-templates.md` — Complete prompt texts (routing vs. output) and tool schemas (KB, form, web_page_reader).
 - `references/embeds-and-production.md` — Embed snippets (Chat Widget, Search) and CSP/domain production checklist.
+- `scripts/analyze_node_noise.py` — Validate/improve crawler `remove_html_elements` selectors against the ingested node HTML (pure Python stdlib, no packages needed).
 
 ---
 
@@ -84,7 +85,7 @@ Load `references/data-sources.md`. Complete, noise-free ingestion is critical fo
 ### 3a. Crawling Best Practices
 - **Default Crawler:** Default to `cheerio` (fast, reliable, and resource-efficient). Only switch to `playwright:adaptive` if the entire page relies on client-side JS rendering and content extraction genuinely fails or would not work without running JavaScript.
 - **Start Small (Low Limits):** When setting up or testing crawl rules, **always start with a low crawl depth (`max_crawl_depth: 2–3`) and page limit (`max_pages_per_crawl: 10–20`)** to inspect extraction quality before running large-scale crawls.
-- **Priority: Strip Boilerplate:** Set `remove_html_elements` to remove headers, menus, navs, breadcrumbs, footers, cookie banners, and embed wrappers.
+- **Priority: Strip Boilerplate:** Set `remove_html_elements` to remove headers, menus, navs, breadcrumbs, footers, cookie banners, and embed wrappers. Rule of thumb: strip anything that appears identically across pages. Validate before a full crawl with `scripts/analyze_node_noise.py` (dumps ingested node HTML or raw pages → reports clean-vs-raw ratios, site-wide boilerplate class tokens with text volume, an over-strip phrase guard, and the exact new `[class*="..."]` selectors to append). Iterate until clean.
 - **Dynamic Real-Time Info:** For dynamic data that changes continuously (e.g. live events, today's inventory), do not use crawler syncs. Use the **`web_page_reader`** AI Action instead (Phase 5).
 
 ### 3b. Configure Supported Data Sources
