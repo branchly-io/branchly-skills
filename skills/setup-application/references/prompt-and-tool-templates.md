@@ -280,8 +280,6 @@ branchly provides a rich ecosystem of specialized AI Actions. Refer to the offic
 | `google_maps_embed` | `google_maps_embed` | Embed interactive Google Maps iframe directly into the chat window. | Requires `GOOGLE_MAPS_API_KEY`; supports travel modes (`driving`, `transit`, etc.). |
 | `regiondo` | `regiondo` | Direct booking of guided tours, tickets, and activities for leisure/tourism websites. | Requires Regiondo `public_key` and `secret_key`. |
 | `venus_knowledge_graph` | `venus_knowledge_graph` | Access regional tourism points of interest, destinations, and public events. | `projects`, `channels`, `domain`. Renders as interactive carousel frontend events. |
-| `bayern_cloud` | `bayern_cloud` | Integrates BayernCloud tourism and regional knowledge data. | Tourism portal integrations in southern Germany/Bavaria. |
-| `send_email` | `send_email` | Direct email forwarding for urgent inquiries (note: prefer `form` for structured input). | `sender_email`: notification recipient address. |
 
 ---
 
