@@ -81,7 +81,7 @@ Load and follow `references/interview-guide.md`. Present your Phase 1 findings a
 Load `references/data-sources.md`. Complete, noise-free ingestion is critical for search and chat accuracy.
 
 ### 3a. Crawling Best Practices
-- **Default Crawler:** Default to `cheerio` (fast and reliable). Switch to `playwright:adaptive` only if the site relies on client-side JS rendering.
+- **Default Crawler:** Default to `cheerio` (fast, reliable, and resource-efficient). Only switch to `playwright:adaptive` if the entire page relies on client-side JS rendering and content extraction genuinely fails or would not work without running JavaScript.
 - **Start Small (Low Limits):** When setting up or testing crawl rules, **always start with a low crawl depth (`max_crawl_depth: 2–3`) and page limit (`max_pages_per_crawl: 10–20`)** to inspect extraction quality before running large-scale crawls.
 - **Priority: Strip Boilerplate:** Set `remove_html_elements` to remove headers, menus, navs, breadcrumbs, footers, cookie banners, and embed wrappers.
 - **Dynamic Real-Time Info:** For dynamic data that changes continuously (e.g. live events, today's inventory), do not use crawler syncs. Use the **`web_page_reader`** AI Action instead (Phase 5).

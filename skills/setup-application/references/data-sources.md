@@ -19,8 +19,8 @@ Boilerplate elements (site-wide navigation headers, dropdown menus, breadcrumbs,
 ## 2. Website Crawler Data Source (`website_crawler`)
 
 ### Best Practices for Crawling:
-1. **Default Crawler Type:** Always use `cheerio` as the default crawler. It is faster, more resource-efficient, and sufficient for the vast majority of websites.
-2. **Dynamic / Client-Side JS Sites:** If a website relies heavily on client-side JS rendering (e.g. React/Vue SPAs, Framer), switch `crawler_type` to `playwright:adaptive` or `playwright:firefox`.
+1. **Default Crawler Type:** Always use `cheerio` as the default crawler. It is significantly faster, more resource-efficient, and sufficient for the vast majority of websites.
+2. **Dynamic / Client-Side JS Sites:** Only switch `crawler_type` to `playwright:adaptive` (or `playwright:firefox`) if the entire page relies on client-side JS rendering and content extraction genuinely fails or would not work without it (e.g. pure client-side SPAs where static HTML has no readable body). If standard server-rendered HTML or SSR is available, stay with `cheerio`.
 3. **Start Small (Strict Exploration Limits):**
    - **Crucial Rule:** When setting up a new crawl or testing crawler selectors, **always set a low limit for `max_crawl_depth` (e.g. 2–3) and `max_pages_per_crawl` (e.g. 10–20)** before scaling up.
    - Verify sample node quality and clean HTML extraction before initiating full site crawls.
@@ -47,7 +47,7 @@ branchly_update_data_source(
     settings={
         "type": "website_crawler",
         "actor": "apify/website-content-crawler",
-        "crawler_type": "cheerio",  # Default; use playwright:adaptive for JS-heavy apps
+        "crawler_type": "cheerio",  # Default; only use playwright:adaptive if whole page requires client-side JS rendering and wouldn't work without it
         "urls": {"start_urls": ["https://<domain>/"]},
         "max_pages_per_crawl": 20,  # Low limit during initial setup/testing
         "max_crawl_depth": 3,  # Low depth during initial setup/testing
