@@ -158,3 +158,26 @@ branchly_update_tool(
     },
 )
 ```
+
+### 3d. Web Page Reader Tool (`web_page_reader`)
+Use for dynamic real-time data access (e.g. today's live events, current inventory, up-to-the-minute status) where relying on scheduled crawler syncs is inadequate:
+```python
+# Create (via branchly_create_tool) or Update:
+branchly_update_tool(
+    tool_id="<web-page-reader-uuid>",
+    active=True,
+    name="read_live_status",
+    description="Fetch current, real-time status and live schedule from {{company_name}}'s live page. Use only when the visitor explicitly asks for real-time status, today's schedule, or current availability.",
+    function_arguments={
+        "object": "web_page_reader_tool_arguments",
+        "url": "https://<domain>/live-status",
+        "target_selector": "main .live-schedule",  # Scopes extraction to the specific dynamic element
+    },
+)
+```
+
+---
+
+## 4. MCP Tool Creation Tools
+
+When defining new tools from scratch, use `branchly_create_tool` (if available in the MCP server) with matching `tool_type`, `name`, `description`, `function_arguments`, and `tool_config`. When updating existing tools created during initial app provisioning, use `branchly_update_tool`.
