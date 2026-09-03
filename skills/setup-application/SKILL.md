@@ -98,8 +98,10 @@ Load `references/data-sources.md`. Complete, noise-free ingestion is critical fo
 ### 3c. Trigger & Monitor Ingestion
 If `branchly_run_data_source(data_source_id="...")` or `branchly_create_data_source(...)` are available in your MCP tools:
 - Trigger the sync asynchronously.
+- **Do NOT poll or loop:** Even if `branchly_read_data_source_runs` is available, the agent must **NOT** ping this tool repeatedly to poll for completion.
 - Direct the user to verify completion in the dashboard at:
   `https://dashboard.branchly.io/{{application_id}}/datasources`
+  before running validation queries.
 
 ---
 

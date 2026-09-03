@@ -195,5 +195,6 @@ branchly_run_data_source(data_source_id="<data-source-uuid>")
 ```
 
 Because indexing and embedding generation happen in the background:
+- **Do NOT poll or spam tools:** While an upcoming `branchly_read_data_source_runs` tool allows checking run history, the agent must **NOT** ping or poll this tool in a loop waiting for completion. Crawls take time depending on site size, and polling wastes tool quota and context tokens.
 - Inform the user: *"Data source sync initiated in the background. You can track progress live in the branchly dashboard under your Data Sources tab (`https://dashboard.branchly.io/<application_id>/datasources`)."*
-- Wait for the job to complete in the dashboard before testing retrieval or running validation queries.
+- Instruct the user to verify completion in the dashboard before testing retrieval or running validation queries.
