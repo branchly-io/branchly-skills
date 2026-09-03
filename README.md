@@ -17,7 +17,7 @@ Systematically debug and optimize a branchly application. Covers session triage,
 
 ### `setup-application`
 
-Guide and execute end-to-end setup and configuration for a branchly application. Conducts website research, interviews the user on use case and guardrails, and configures data sources, prompts, AI actions, and knowledge base nodes via MCP.
+Guide and execute end-to-end setup, configuration, and validation for an existing branchly application. Conducts website research, interviews the user on use case and guardrails, configures data sources, prompts, and tools via MCP, and validates response quality and tool routing.
 
 **Triggers when you mention:**
 - "set up my branchly application" / "setup branchly app"
@@ -25,6 +25,7 @@ Guide and execute end-to-end setup and configuration for a branchly application.
 - "create initial prompts and tools for branchly"
 - "help me configure branchly for my domain"
 - "initial branchly configuration"
+- "configure and test my branchly chatbot"
 
 ### `content-ideas`
 
