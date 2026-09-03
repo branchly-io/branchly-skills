@@ -68,11 +68,12 @@ Before asking questions, inspect the connected application and gather domain con
 ## Phase 2 — Structured User Alignment (Interview)
 
 Load and follow `references/interview-guide.md`. Present your Phase 1 findings as assumptions and align with the user on:
-1. **Audience & Tone:** Target personas, brand spelling, formal/informal tone, language policy.
+1. **Audience, Tone & Language:** Target personas, brand spelling, formal/informal tone, `reply_in_user_language` vs. `use_browser_locale` cross-lingual translation.
 2. **Interface Selection:** Floating Chat Widget, Inline Chat Embed, Search Interface, or Headless API.
-3. **Core Use Cases:** Top 3–5 recurring questions and conversion goals (e.g. demo, quote, support).
-4. **Guardrails & Limits:** Competitor rule (never mention competitors by name), pricing/discount policy, out-of-scope topics.
-5. **Fallbacks & Escalation:** Transparent admission of no-knowledge and direct escalation path (`form` tool, email, phone).
+3. **Core Use Cases & Business Rules:** Top recurring inquiries, conversion goals, and specific interaction handling (e.g. never outputting phone numbers directly; always routing through form or button tools).
+4. **Data Sources & Architecture:** Static knowledge (crawlers, PDFs, CMS) vs. dynamic run-time data (APIs, MCP servers, web page reader). Proactively advise on APIs/MCP as the most reliable option and offer to parse raw specs/curl.
+5. **Company-Specific Guardrails:** Competitor policies and explicit industry boundaries (avoid duplicating built-in system safety).
+6. **Fallback Behavior (Output Prompting):** What to reply when context is missing (deterministic output prompt phrasing) and escalation triggers (e.g. typing "Kontakt" to trigger forms).
 
 ---
 

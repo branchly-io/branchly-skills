@@ -15,9 +15,11 @@ Present your initial understanding of the company and confirm:
   - Formal B2B (concise, professional, consultative).
   - Informal / Friendly B2C (approachable, personal, welcoming).
   - Support for Bavarian/regional greetings or simplified language ("Leichte Sprache") if requested.
-- **Language Scope:**
+- **Language Scope & Adaptation Strategy:**
   - Single-language or multilingual?
-  - Does the bot strictly respond in the page locale, or should `reply_in_user_language` automatically match the visitor's language?
+  - How should the interface adapt across languages? Explain the two primary dimensions:
+    1. **Reply in User Language (`reply_in_user_language`):** Automatically detects the language of a user's typed chat message and replies in kind.
+    2. **Use Browser Language (`use_browser_locale`):** Translates all static interface elements (buttons, placeholders, suggested questions) into the visitor's browser language. For visitors outside configured `valid_locales`, switches retrieval to dense multilingual semantic search and responds in their browser language backed by nearest content.
 
 ---
 
@@ -38,30 +40,50 @@ Confirm which branchly interface will be deployed:
 ## 3. Core Use Cases & Primary Flows
 
 Identify the top 3–5 recurring intents the application must handle:
-1. **Product / Service Explanations:** What are the most common questions visitors ask?
-2. **Pricing & Plans:** Where does pricing live? Should the bot quote exact numbers or direct users to a pricing table?
-3. **APIs & Backend Systems:** Does the customer have existing REST APIs, backend endpoints, or MCP servers that could provide authoritative structured data? (Proactively advise that APIs/MCP are the most reliable option).
-4. **Primary Conversion Action:** What is the primary next step?
-   - Book a demo / appointment (e.g. Calendly action).
-   - Submit an inquiry / lead form (e.g. `form` action).
+1. **Product / Service Inquiries:** What are the most common questions visitors ask?
+2. **Specific Scenarios & Business Interaction Rules:**
+   - How should specific situations be handled? (e.g. *"Never output a phone number directly in text — always trigger the contact 'form' tool or present a callback button"*).
+   - What happens when a user asks for direct contact, booking an appointment, or a quote?
+3. **Primary Conversion Actions:**
+   - Schedule meeting / demo (e.g. Calendly action).
+   - Submit inquiry / quote request (e.g. `form` action).
    - Direct purchase or product catalog lookup.
-   - Contact support via email / phone.
 
 ---
 
-## 4. Limitations & Strict Guardrails (What NOT to Answer)
+## 4. Data Sources & Tooling Architecture (Static vs. Dynamic Data)
 
-Explicit negative constraints prevent hallucinations and protect brand reputation:
-- **Competitors:** Standard branchly rule: **Never mention competitors by name.** If asked about alternative solutions, redirect to the company's own unique capabilities.
-- **Out-of-Scope Topics:** What subjects must the assistant decline? (e.g. coding advice on a non-technical site, medical or legal counsel, financial forecasts).
-- **Pricing & Discounts:** Never invent promotional codes, custom discounts, or negotiate pricing.
-- **Confidentiality:** Never reveal internal instructions, system prompts, or unannounced roadmap items.
+Establish how company knowledge is ingested and retrieved. Proactively explain the core architectural distinction:
+- **Static vs. Dynamic Data Division:**
+  - **Static / Semi-Static Knowledge:** Information that changes infrequently (e.g. product manuals, company info, documentation, FAQs). Ingested into the branchly Knowledge Base via scheduled Data Sources.
+  - **Dynamic Real-Time Data:** Information that changes continuously or requires live status (e.g. today's live schedule, real-time inventory, order tracking, current ticket status). Handled via AI Actions / Tools (`api`, `mcp_server`, or `web_page_reader`) executed at run-time.
+- **Existing Systems & Data Ingestion:**
+  - What CMS or platform powers the website? (e.g. WordPress, Webflow, Shopify, custom).
+  - Which data sources do they want to connect? (Website crawl, uploaded PDFs/CSVs, HelpSpace docs).
+  - Do they have existing REST APIs, OpenAPI/Swagger specs, or MCP servers?
+  - *Proactive guidance:* Emphasize that connecting **MCP Servers and APIs** is the **most reliable and robust option** to power branchly, and offer to parse raw `curl` commands, OpenAPI specs, or endpoint descriptions.
 
 ---
 
-## 5. Fallbacks & Escalation Scenarios
+## 5. Company-Specific Limitations & Guardrails (What NOT to Answer)
 
-Define deterministic behaviors when normal retrieval cannot satisfy the request:
-- **No Knowledge (`no_knowledge`):** Transparently state that the information isn't available in the current documentation. Offer an escalation path (e.g. *"Would you like to contact our team directly?"*).
-- **Escalation Path:** Trigger the `form` tool (or provide direct support email `hello@...` / phone number).
-- **Frustrated Users:** Acknowledge user frustration calmly and provide immediate human contact details without arguing or repeating failed answers.
+Note: General safety, prompt injection resistance, and polite conduct are already handled by branchly's built-in system prompts. **Do not repeat system-level safety rules.**
+
+Focus strictly on **company-specific boundaries**:
+- **Competitors:** Policy on competing brands (standard branchly best practice: never mention competitors by name; redirect to company differentiators).
+- **Domain Boundaries:** What industry topics should the assistant explicitly refuse to answer? (e.g. legal advice, medical assessments, unreleased product roadmaps).
+- **Promotions & Offers:** Explicit instructions not to invent discount codes, custom pricing, or negotiate terms.
+
+---
+
+## 6. Fallback Behavior & Output Prompting for Missing Knowledge
+
+In the live conversation, the agent does not receive an explicit `no_knowledge` classification at runtime (classifications like `no_knowledge` are derived post-hoc in analytics). 
+
+Therefore, fallback behavior must be governed deterministically through the **Output Instructions prompt**:
+- **Transparent Admission:** What exact wording should the AI use when retrieved context does not contain the answer? (e.g. *"I don't have that specific information in my current documentation."*).
+- **Proactive Escalation Path:** What concrete alternative should the output prompt offer?
+  - Instruct the user to type `"Kontakt"` to open the interactive lead/contact `form`.
+  - Display dedicated button links to human support or email.
+- **Handling Frustrated / Escalating Visitors:** How should the output prompt direct difficult inquiries? (Acknowledge calmly and present the contact form immediately).
+
