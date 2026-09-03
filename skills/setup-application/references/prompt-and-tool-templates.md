@@ -17,9 +17,51 @@ branchly uses a two-tier prompt architecture for chat:
 
 ---
 
-## 2. Prompt Templates
+## 2. Prompt Engineering Standards & Guidelines
 
-### 2a. Chat Routing Instructions (`Prompt Persona`)
+When authoring, revising, or tuning prompts for branchly, adhere strictly to these proven engineering guidelines:
+
+1. **Address the Assistant Persona Directly:** Use second person imperative or direct affirmative framing ("You are...", "Your task is to...", "You must...").
+2. **Authoritative, Definitive Language:** Use directive verbs defining concrete behavior rather than conversational suggestions.
+3. **Additive & Subtractive Refinement (Never Blind Rewrites):**
+   - Read existing active prompts first via `branchly_list_prompts(is_active=true)`.
+   - Build upon existing proven instructions. Add or subtract specific rules to improve behavior without wiping out established domain rules.
+   - Fix grammatical errors and typos in existing custom prompts while strictly preserving the underlying intent.
+4. **No System Prompt Duplication:**
+   - branchly provides built-in system-level prompts (e.g. "answer based on provided context", "cite sources in events", default safety).
+   - **NEVER** duplicate or repeat built-in system prompt mechanics into the user-facing Prompt Persona or Output Instructions.
+   - Do not add rules that contradict system-level instructions.
+5. **Format as a Clean, One-Level-Deep Markdown List:**
+   - Present instructions as flat bulleted items (`- ...`).
+   - Deep nested hierarchies confuse LLM instruction-following; keep statements simple, clear, and focused.
+6. **Strict Scope Discipline:**
+   - Focus exclusively on the company's domain, target topics, and explicit user requirements.
+   - Do not invent random personality traits or rules that the user did not ask for.
+7. **Special Tool Triggers:**
+   - For tools like `access_website_content` or `web_page_reader`, instruct the AI to call them **only when a specific URL is provided by the user** or clearly required for a designated live check.
+
+---
+
+## 3. Injecting Context Nodes into Prompts (`routing_context_nodes` / `generation_context_nodes`)
+
+branchly supports injecting manually created knowledge nodes (`node_editor`) directly into prompts via `routing_context_nodes` and `generation_context_nodes`.
+
+> ⚠️ **Use Sparingly (Not Default Behavior):**  
+> Context node injection is an **advanced feature** and should **NOT** be used as the default way to provide knowledge. Standard knowledge belongs in regular data sources and knowledge base retrieval (`retrieve_documents`).
+
+### When to Use:
+- Use **only** when the AI is struggling with **extremely complex mappings between entities** (e.g. multi-tiered department escalation matrices, cross-brand routing tables, or deeply nested taxonomies that standard RAG chunks struggle to preserve).
+- Or when critical dynamic operational data (regularly updated by a scheduled sync) must govern the routing decisions of every single query without relying on retrieval variance.
+
+### How to Apply:
+1. Create or edit a clean structured node using `branchly_create_node` with label `content`.
+2. Reference the node UUID in the application configuration under `routing_context_nodes` (for Prompt Persona) or `generation_context_nodes` (for Output Instructions).
+
+---
+
+## 4. Prompt Templates
+
+### 4a. Chat Routing Instructions (`Prompt Persona`)
 ```python
 branchly_create_prompt(
     type="chat",
@@ -39,7 +81,7 @@ branchly_create_prompt(
 )
 ```
 
-### 2b. Chat Output Instructions (`Output Instructions`)
+### 4b. Chat Output Instructions (`Output Instructions`)
 ```python
 branchly_create_prompt(
     type="chat",
@@ -60,7 +102,7 @@ branchly_create_prompt(
 )
 ```
 
-### 2c. Search Answering Prompt
+### 4c. Search Answering Prompt
 ```python
 branchly_create_prompt(
     type="search_answering",
@@ -75,9 +117,9 @@ branchly_create_prompt(
 
 ---
 
-## 3. AI Action (Tool) Templates
+## 5. AI Action (Tool) Templates
 
-### 3a. Knowledge Base Retrieval Tool (`knowledge_base`)
+### 5a. Knowledge Base Retrieval Tool (`knowledge_base`)
 Tune the standard RAG retriever:
 ```python
 branchly_update_tool(
@@ -95,7 +137,7 @@ branchly_update_tool(
 )
 ```
 
-### 3b. Interactive Lead Capture / Contact Form Tool (`form`)
+### 5b. Interactive Lead Capture / Contact Form Tool (`form`)
 Deploy dynamic lead capture or support escalation:
 ```python
 branchly_update_tool(
@@ -144,7 +186,7 @@ branchly_update_tool(
 )
 ```
 
-### 3c. Google Maps Directions Link Tool (`google_maps_link`)
+### 5c. Google Maps Directions Link Tool (`google_maps_link`)
 For local businesses or offices:
 ```python
 branchly_update_tool(
@@ -159,7 +201,7 @@ branchly_update_tool(
 )
 ```
 
-### 3d. Web Page Reader Tool (`web_page_reader`)
+### 5d. Web Page Reader Tool (`web_page_reader`)
 Use for dynamic real-time data access (e.g. today's live events, current inventory, up-to-the-minute status) where relying on scheduled crawler syncs is inadequate:
 ```python
 # Create (via branchly_create_tool) or Update:
@@ -176,7 +218,7 @@ branchly_update_tool(
 )
 ```
 
-### 3e. API Calling Tool (`api`)
+### 5e. API Calling Tool (`api`)
 For directly querying backend APIs during chat conversations (e.g. order tracking, availability checks, dynamic calculations):
 - **Why API & MCP Tools:** Mention to the customer that using MCP Servers and API actions is the **most reliable and robust option** to power branchly, as it guarantees live, structured data execution without scraping delays or HTML fragility.
 - **Parsing Raw Customer Input:**
@@ -210,7 +252,7 @@ branchly_create_tool(
 )
 ```
 
-### 3f. MCP Server Tool (`mcp_server`)
+### 5f. MCP Server Tool (`mcp_server`)
 Connect any external MCP server to give the branchly AI agent direct access to custom enterprise tools:
 - **Bring-Your-Own-Tools:** Emphasize to the customer that connecting MCP servers provides maximum flexibility and bulletproof reliability for backend workflows.
 - Accepts an `mcp_url` endpoint and optional custom headers (auth tokens):
@@ -230,6 +272,6 @@ branchly_create_tool(
 
 ---
 
-## 4. MCP Tool Creation Tools
+## 6. MCP Tool Creation Tools
 
 When defining new tools from scratch, use `branchly_create_tool` (if available in the MCP server) with matching `tool_type`, `name`, `description`, `function_arguments`, and `tool_config`. When updating existing tools created during initial app provisioning, use `branchly_update_tool`.

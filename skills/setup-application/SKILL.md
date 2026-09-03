@@ -104,8 +104,16 @@ If `branchly_run_data_source(data_source_id="...")` or `branchly_create_data_sou
 
 ## Phase 4 — Two-Tier Prompt Architecture
 
-branchly strictly decouples routing logic from response formatting. Refer to `references/prompt-and-tool-templates.md` for full prompt text.
+branchly strictly decouples routing logic from response formatting. Refer to `references/prompt-and-tool-templates.md` for full prompt text, engineering standards, and context node injection rules.
 
+### 4a. Prompt Engineering Standards
+- **Authoritative Directives:** Address the assistant persona directly ("You are...", "Your task is to...").
+- **Additive & Subtractive Refinement:** Read existing active prompts first via `branchly_list_prompts(is_active=true)`. Build upon them, fix typos/grammar, and refine without wiping out domain context.
+- **No System Prompt Duplication:** Never repeat built-in branchly system instructions (e.g. "answer based on provided context") or contradict them.
+- **Clean Flat Markdown Lists:** Format prompts as simple, one-level-deep bulleted lists (`- ...`).
+- **Context Nodes Injection (Advanced / Sparingly):** Manually created nodes (`node_editor`) can be injected via `routing_context_nodes` or `generation_context_nodes` — use only when the AI struggles with extremely complex entity mappings.
+
+### 4b. Configure Specific Prompts
 1. **Routing Prompt / Prompt Persona (`subtype="routing_instructions"`, `interface_type="chat"`):**
    - Controls which AI Actions are called and drives auto-evaluation.
    - Explicitly instruct when to call `retrieve_documents` vs. `form` vs. other tools.
