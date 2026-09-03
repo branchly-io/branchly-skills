@@ -62,6 +62,7 @@ Establish how company knowledge is ingested and retrieved. Proactively explain t
   - Which data sources do they want to connect? (Website crawl, uploaded PDFs/CSVs, HelpSpace docs).
   - Do they have existing REST APIs, OpenAPI/Swagger specs, or MCP servers?
   - *Proactive guidance:* Emphasize that connecting **MCP Servers and APIs** is the **most reliable and robust option** to power branchly, and offer to parse raw `curl` commands, OpenAPI specs, or endpoint descriptions.
+  - *Pre-built Integrations:* Mention that branchly offers pre-built MCP connections for **destination.one** (branchly-built), **Venus Social Knowledge Graph** (branchly-built), **DHL parcel tracking** (branchly-built), and **Infomaxx** (directly from infomaxx), plus ready-to-use API templates like **Holidu Whitelabel** for vacation rentals.
 
 ---
 

@@ -251,6 +251,11 @@ branchly_create_tool(
 ### 5f. MCP Server Tool (`mcp_server`)
 Connect any external MCP server to give the branchly AI agent direct access to custom enterprise tools:
 - **Bring-Your-Own-Tools:** Emphasize to the customer that connecting MCP servers provides maximum flexibility and bulletproof reliability for backend workflows.
+- **Pre-Built MCP Connections Available:** branchly offers several pre-built MCP integrations out of the box that can be activated directly:
+  - **destination.one** (*branchly-built*): Tourism destinations, POIs, and regional content.
+  - **Venus Social Knowledge Graph** (*branchly-built*): Events, leisure activities, and tourism POIs rendered with rich frontend carousel cards.
+  - **DHL parcel tracking** (*branchly-built*): Real-time shipment status and parcel delivery tracking.
+  - **Infomaxx** (*directly from infomaxx*): Direct data sync for destination marketing organizations and tourism boards.
 - Accepts an `mcp_url` endpoint and optional custom headers (auth tokens):
 ```python
 branchly_create_tool(
@@ -266,7 +271,11 @@ branchly_create_tool(
 )
 ```
 
-### 5g. Additional Built-In AI Actions (Catalog Overview)
+### 5g. Pre-Built API Tool Templates (e.g. Holidu Whitelabel)
+For integrations that run over REST rather than MCP, branchly provides pre-configured templates using the `api` tool:
+- **Holidu Whitelabel Template:** Easily connects holiday home/vacation rental search via Holidu's whitelabel API, allowing users to query availability, locations, and pricing directly inside the chat interface without manual workflow building.
+
+### 5h. Additional Built-In AI Actions (Catalog Overview)
 
 branchly provides a rich ecosystem of specialized AI Actions. Refer to the official [AI Actions Documentation](https://docs.branchly.io/docs/AI-actions) for in-depth parameter schemas and setup details:
 
