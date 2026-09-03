@@ -59,7 +59,31 @@ Embed inside the site header, navigation bar, or hero section:
 
 ---
 
-## 2. Production Deployment Security Checklist
+## 2. Advanced Analytics & Interaction Tracking
+
+branchly provides enterprise tracking and analytics capabilities that should be reviewed and configured before launch:
+
+### 2a. Topic & Intent Classification (`classification_mode="active"`)
+- branchly automatically clusters conversations into semantic **topics** (subject-matter trends) and **intents** (user goals).
+- Ensure `classification_mode: "active"` is configured on the application so user queries are categorized for analytics and weekly digest reports.
+- Use `branchly_get_trending_classifications(classification_type="topic"|"intent")` to track shifts in user interest over time.
+
+### 2b. Follow-Up Questions & Conversational Navigation (`follow_up_actions=true`)
+- Enable `follow_up_actions: true` in Application Settings.
+- The AI dynamically generates suggested follow-up questions and next-step navigation pills at the end of responses.
+- Internal links automatically navigate within the host site frame, while external links open safely in new tabs.
+
+### 2c. Interaction & Element Tracking (Anchor Tags & Buttons)
+Configure fine-grained user journey tracking under `Settings > Tracking`:
+- **Track Page Navigations / Link Clicks:** Toggle on to trace complete visitor pathways across Docusaurus, documentation, or marketing layouts.
+- **Global Anchor & Button Tracking:** Define tracking rules to automatically capture all clicks on anchor links (`<a>`) and buttons (`<button>`) across the website.
+- **Custom Element Tracking (`data-branchly`):**
+  - Add the `data-branchly="<label>"` attribute to specific UI elements (e.g. hero CTA buttons, feature cards, pricing tiers) to track high-value conversion milestones.
+- **Dashboard Auto-Exclusion:** Interaction events inside the branchly widgets themselves are automatically filtered out to prevent skewing website analytics.
+
+---
+
+## 3. Production Deployment Security Checklist
 
 1. **Allowed Website Locations (`embed_location`):**
    - For security, branchly blocks widgets loaded on unlisted domains.

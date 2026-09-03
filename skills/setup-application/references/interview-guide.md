@@ -40,7 +40,8 @@ Confirm which branchly interface will be deployed:
 Identify the top 3–5 recurring intents the application must handle:
 1. **Product / Service Explanations:** What are the most common questions visitors ask?
 2. **Pricing & Plans:** Where does pricing live? Should the bot quote exact numbers or direct users to a pricing table?
-3. **Primary Conversion Action:** What is the primary next step?
+3. **APIs & Backend Systems:** Does the customer have existing REST APIs, backend endpoints, or MCP servers that could provide authoritative structured data? (Proactively advise that APIs/MCP are the most reliable option).
+4. **Primary Conversion Action:** What is the primary next step?
    - Book a demo / appointment (e.g. Calendly action).
    - Submit an inquiry / lead form (e.g. `form` action).
    - Direct purchase or product catalog lookup.

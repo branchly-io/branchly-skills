@@ -176,6 +176,58 @@ branchly_update_tool(
 )
 ```
 
+### 3e. API Calling Tool (`api`)
+For directly querying backend APIs during chat conversations (e.g. order tracking, availability checks, dynamic calculations):
+- **Why API & MCP Tools:** Mention to the customer that using MCP Servers and API actions is the **most reliable and robust option** to power branchly, as it guarantees live, structured data execution without scraping delays or HTML fragility.
+- **Parsing Raw Customer Input:**
+  - Ask the customer to provide their endpoint details.
+  - Parse whatever raw input the customer provides: `curl` snippets, API docs, Swagger snippets, or informal descriptions.
+  - Automatically extract the HTTP method, endpoint URL, query/path parameters, and map them to Mustache placeholders (e.g. `{{order_id}}`).
+```python
+branchly_create_tool(
+    name="track_order",
+    description="Check real-time order status when the customer provides their order ID or asks for parcel tracking.",
+    active=True,
+    tool_type="api",
+    tool_config={
+        "object": "api_tool_config",
+        "parameters": [
+            {
+                "name": "order_id",
+                "description": "The customer's order ID or tracking code",
+                "type": "text",
+                "required": True,
+            }
+        ],
+    },
+    function_arguments={
+        "object": "api_tool_arguments",
+        "method": "GET",
+        "url": "https://api.example.com/v1/orders/{{order_id}}",
+        "headers": {"Authorization": "Bearer YOUR_SECRET_OR_KEY"},
+        "response_path": "order.status",
+    },
+)
+```
+
+### 3f. MCP Server Tool (`mcp_server`)
+Connect any external MCP server to give the branchly AI agent direct access to custom enterprise tools:
+- **Bring-Your-Own-Tools:** Emphasize to the customer that connecting MCP servers provides maximum flexibility and bulletproof reliability for backend workflows.
+- Accepts an `mcp_url` endpoint and optional custom headers (auth tokens):
+```python
+branchly_create_tool(
+    name="ecommerce_mcp",
+    description="Interface with internal e-commerce systems for product lookup, inventory checks, and return tracking via MCP.",
+    active=True,
+    tool_type="mcp_server",
+    function_arguments={
+        "object": "mcp_server_tool_arguments",
+        "mcp_url": "https://mcp.internal.example.com/sse",
+        "headers": {"Authorization": "Bearer MCP_API_KEY"},
+    },
+)
+```
+
 ---
 
 ## 4. MCP Tool Creation Tools

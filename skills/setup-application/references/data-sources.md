@@ -111,6 +111,11 @@ Processes uploaded PDF and CSV documents into structured knowledge nodes.
 
 ### C. OpenAPI Specification (`openAPI`)
 Syncs structured data directly from REST APIs by importing an OpenAPI JSON specification.
+- **Why API / OpenAPI:** Using APIs and MCP servers is the **most reliable option** to use branchly because data is structured, deterministic, and free of HTML markup artifacts.
+- **Customer Input & Agent Parsing:**
+  - Proactively inform the customer that connecting APIs or MCP servers yields the highest reliability and request this information if available.
+  - The agent should try its best to parse whatever raw input the customer provides — whether that is raw `curl` commands, OpenAPI/Swagger JSON or YAML specs, Postman collections, or informal endpoint descriptions.
+  - From this raw input, the agent extracts the `base_url`, headers/auth, the relevant endpoint (`operation_id`), response schema, and writes the `data_template_mapping`.
 - Calls a specified `operation_id` on the API endpoint and maps JSON responses into knowledge nodes using Mustache templating.
 - Settings structure:
   ```python

@@ -88,6 +88,7 @@ Load `references/data-sources.md`. Complete, noise-free ingestion is critical fo
 
 ### 3b. Configure Supported Data Sources
 - **`website_crawler`**: Update via `branchly_update_data_source` (always send full `settings` object).
+- **APIs & MCP Tools (Proactive Recommendation):** Inform the customer that connecting APIs or MCP servers is the **most reliable and robust option** to use branchly. Offer to parse any raw input the customer provides (`curl` commands, OpenAPI specs, Swagger docs, or endpoint descriptions) to configure OpenAPI data sources or API tools automatically.
 - **`wordpress`**: ⚠️ **Human action required:** The user must first connect WordPress under `dashboard.branchly.io` (`Settings > Integrations > WordPress`). The agent then creates/updates the `wordpress` data source linking `integration_id`.
 - **`file_upload`**: For manuals, PDFs, and price lists.
 - **`openAPI`**: For REST API endpoints with Mustache mapping.
@@ -188,8 +189,12 @@ If any validation queries fail:
 Load `references/embeds-and-production.md`.
 
 1. **Health Check:** Re-read `branchly_get_application()`, `branchly_list_prompts(is_active=true)`, and `branchly_list_tools(active=true)` to confirm all changes landed.
-2. **Deliver Embed Snippets:** Provide the user with exact `<script>` and `<div>` snippets for their chosen interface.
-3. **Production Reminders:**
+2. **Advanced Analytics & Tracking Review:** Verify application analytics settings in `references/embeds-and-production.md`:
+   - Active Topic/Intent classification (`classification_mode="active"`).
+   - Dynamic follow-up question pills (`follow_up_actions=true`).
+   - Journey tracking rules for anchor tags (`<a>`), buttons (`<button>`), and custom conversion tags (`data-branchly`).
+3. **Deliver Embed Snippets:** Provide the user with exact `<script>` and `<div>` snippets for their chosen interface.
+4. **Production Reminders:**
    - Ensure the host domain is registered under `embed_location` in branchly Application Settings.
    - Whitelist `*.branchly.io` in the website Content Security Policy (CSP).
    - Brand convention: Always write the platform name lowercase `"branchly"`.
