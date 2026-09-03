@@ -86,7 +86,7 @@ branchly_update_data_source(
             "*/login*"
         ],
         # Remove site-wide elements (anything appearing on multiple pages) that pollute retrieval
-        "remove_html_elements": "footer, div.footer, #footer, header, div.pageheader, #pageheader, script, style, noscript, svg, nav, .nav, #nav, .navigation, .breadcrumb, [role=\"alert\"], [role=\"banner\"], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"region\"][aria-label*=\"skip\" i], [aria-modal=\"true\"], #branchly-chat-widget-container, #branchly-embed-container, #branchly-chat-embed-container, #branchly-search-interface-container, .cookie-banner, #cookie-banner",
+        "remove_html_elements": "footer, div.footer, #footer, header, div.pageheader, #pageheader, script, style, noscript, svg, nav, .nav, #nav, .navigation, .breadcrumb, [role=\"alert\"], [role=\"banner\"], [role=\"dialog\"], [role=\"alertdialog\"], [role=\"region\"][aria-label*=\"skip\" i], [aria-modal=\"true\"], #branchly-chat-widget-container, #branchly-embed-container, #branchly-chat-embed-container, #branchly-search-interface-container, .cookie-banner, #cookie-banner, [class*=\"BookingButton\"], [class*=\"SkipLink\"], [class*=\"TeaserSlider\"], [class*=\"TeaserList\"], [class*=\"TeaserMasonry\"], [class*=\"TeaserSingle\"], [class*=\"TeaserGrid\"], [class*=\"TeaserInformation\"], [class*=\"ParallaxTeaser\"], [class*=\"ListTeaser\"], [class*=\"mco-button\"], [class*=\"mco-animation\"], [class*=\"animationWrapper\"]",
         "unavailable_source_policy": "delete_unavailable",
         "title_suffix_to_remove": " | <BrandName>",
         "custom_tags": []
@@ -98,10 +98,22 @@ branchly_update_data_source(
 
 ## 4. Noise-Removal Selectors (our default set)
 
+> **Operational loop for tuning selectors on a new site:** see
+> `scripts/analyze_crawler_noise.py`. Dump the ingested node HTML via
+> `branchly_list_nodes(data_source_ids=[...])` (persistent output lands as a JSON
+> spillover file), then run:
+> ```
+> uv run --with beautifulsoup4 python scripts/analyze_crawler_noise.py <node_dump.json>
+> ```
+> It reports clean-vs-raw text ratios, residual noise-mark counts, whether key body
+> phrases survive stripping, and ranked residual `class` tokens on link elements —
+> the exact new `[class*="..."]` selectors to append to `remove_html_elements`.
+> Iterate: extend selectors → re-sync → re-dump → re-run, until no noise remains.
+
 The docs describe the `remove_html_elements` mechanism but do not publish a canonical selector list. Use this list as a starting point:
 
 ```css
-footer, div.footer, #footer, header, div.pageheader, #pageheader, script, style, noscript, svg, nav, .nav, #nav, .navigation, .breadcrumb, [role="alert"], [role="banner"], [role="dialog"], [role="alertdialog"], [role="region"][aria-label*="skip" i], [aria-modal="true"], #branchly-chat-widget-container, #branchly-embed-container, #branchly-chat-embed-container, #branchly-search-interface-container, .cookie-banner, #cookie-banner, [class*="cookie" i], [id*="cookie" i]
+footer, div.footer, #footer, header, div.pageheader, #pageheader, script, style, noscript, svg, nav, .nav, #nav, .navigation, .breadcrumb, [role="alert"], [role="banner"], [role="dialog"], [role="alertdialog"], [role="region"][aria-label*="skip" i], [aria-modal="true"], #branchly-chat-widget-container, #branchly-embed-container, #branchly-chat-embed-container, #branchly-search-interface-container, .cookie-banner, #cookie-banner, [class*="cookie" i], [id*="cookie" i], [class*="BookingButton"], [class*="SkipLink"], [class*="TeaserSlider"], [class*="TeaserList"], [class*="TeaserMasonry"], [class*="TeaserSingle"], [class*="TeaserGrid"], [class*="TeaserInformation"], [class*="ParallaxTeaser"], [class*="ListTeaser"], [class*="mco-button"], [class*="mco-animation"], [class*="animationWrapper"]
 ```
 
 **Full-settings rule:** when updating via `branchly_update_data_source`, `settings` requires the **complete object** — partial settings are not merged. Read the current settings first, then re-apply the full payload with your change merged in.
