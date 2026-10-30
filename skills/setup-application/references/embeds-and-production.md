@@ -6,8 +6,8 @@ Use this reference during **Phase 8 (Embed Delivery & Production Handover)**.
 
 | Topic | Canonical source |
 |---|---|
-| Embed scripts & container markup (per interface) | [docs.branchly.io/docs/how-to-embed](https://docs.branchly.io/docs/how-to-embed) |
-| Application settings (analytics, retrieval, tracking, locale) | [docs.branchly.io/docs/settings](https://docs.branchly.io/docs/settings) |
+| Embed scripts & container markup (per interface) | [branchly.io/en/docs/how-to-embed](https://branchly.io/en/docs/how-to-embed) |
+| Application settings (analytics, retrieval, tracking, locale) | [branchly.io/en/docs/settings](https://branchly.io/en/docs/settings) |
 
 The docs own the exact embed markup and the full setting-by-setting descriptions. This file holds only the **setup-decision recommendations** — what to review before launch, the recommended values, and the production go-live checklist.
 
@@ -15,7 +15,7 @@ The docs own the exact embed markup and the full setting-by-setting descriptions
 
 ## 1. Embed Snippets — get them from the docs / dashboard
 
-For every interface (Chat Widget, Inline Chat, Search, Form), fetch the exact `<script>` + container markup from **[how-to-embed](https://docs.branchly.io/docs/how-to-embed)** — or, better, copy the snippet straight from the **Dashboard > User Interface** so the token/`src` are correct for the app.
+For every interface (Chat Widget, Inline Chat, Search, Form), fetch the exact `<script>` + container markup from **[how-to-embed](https://branchly.io/en/docs/how-to-embed)** — or, better, copy the snippet straight from the **Dashboard > User Interface** so the token/`src` are correct for the app.
 
 **Current embedding surface (docs):**
 - **Chat Widget** — floating bubble (`branchly-chat-widget-container`); also available as a standalone `<branchly-chat-widget>` custom element.
@@ -31,7 +31,7 @@ For every interface (Chat Widget, Inline Chat, Search, Form), fetch the exact `<
 
 The settings below are **optional, mutually independent** features that can improve **performance, analytical value, or UX** once the application is live. They are **not required** to deliver a working v1 application. For an initial setup, the AI agent should **only briefly mention that they exist** (and be able to enable them on request later) — not configure or dwell on them now.
 
-Field-level detail lives in the [settings docs](https://docs.branchly.io/docs/settings).
+Field-level detail lives in the [settings docs](https://branchly.io/en/docs/settings).
 
 ### 2a. Retrieval customization & boosting
 - **Custom Boosting:** per-node `score_boost` to prioritize high-value content (key landing pages, FAQs, contact node) — `mode="mult"`, active for `search` + `chat`.

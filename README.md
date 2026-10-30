@@ -72,7 +72,7 @@ npx skills add branchly-io/branchly-skills --skill setup-application
 
 ## Requirements
 
-- [OpenCode](https://opencode.ai) or any other agent platform (Claude Code, Codex, Gemini CLI, Cursor, etc.) with the [branchly MCP server](https://docs.branchly.io/docs/mcp-server) configured
+- [OpenCode](https://opencode.ai) or any other agent platform (Claude Code, Codex, Gemini CLI, Cursor, etc.) with the [branchly MCP server](https://branchly.io/en/docs/mcp-server) configured
 - branchly MCP server connected (provides `branchly_*` tools)
 
 ## License

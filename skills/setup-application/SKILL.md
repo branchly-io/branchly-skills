@@ -21,7 +21,7 @@ This skill guides an AI agent through configuring, prompting, tuning, and valida
 
 > **Precondition**: The branchly application already exists (created during signup/onboarding) and its API key is connected via MCP. This skill configures crawler ingestion, data sources, prompt architecture, AI actions, baseline nodes, and runs programmatic quality validation.
 
-Official documentation: [docs.branchly.io/docs](https://docs.branchly.io/docs)
+Official documentation: [branchly.io/en/docs](https://branchly.io/en/docs)
 
 ---
 

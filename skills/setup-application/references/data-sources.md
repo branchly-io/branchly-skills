@@ -6,9 +6,9 @@ Use this reference during **Phase 3 (Data Ingestion)** of the setup workflow.
 
 | Topic | Canonical source |
 |---|---|
-| Supported data source types & field schemas | [docs.branchly.io/docs/data-sources](https://docs.branchly.io/docs/data-sources) |
-| MCP data source methods (`list/create/update/run_data_source`) | [docs.branchly.io/docs/mcp-server](https://docs.branchly.io/docs/mcp-server) |
-| Settings the agent configures | [docs.branchly.io/docs/settings](https://docs.branchly.io/docs/settings) |
+| Supported data source types & field schemas | [branchly.io/en/docs/data-sources](https://branchly.io/en/docs/data-sources) |
+| MCP data source methods (`list/create/update/run_data_source`) | [branchly.io/en/docs/mcp-server](https://branchly.io/en/docs/mcp-server) |
+| Settings the agent configures | [branchly.io/en/docs/settings](https://branchly.io/en/docs/settings) |
 
 Load the field schemas (WordPress, file_upload, openAPI, helpspace, webhook) and the MCP method semantics from those pages when you need them. The rest of this file holds only the operational rules that are **not** spelled out there.
 
@@ -142,7 +142,7 @@ footer, div.footer, #footer, header, div.pageheader, #pageheader, script, style,
 
 ## 5. Supported Data Sources — Operational Notes
 
-Field schemas and setup requirements live in the [data-sources docs](https://docs.branchly.io/docs/data-sources). The operational nuances the docs don't capture:
+Field schemas and setup requirements live in the [data-sources docs](https://branchly.io/en/docs/data-sources). The operational nuances the docs don't capture:
 
 | Source | Operational note |
 |---|---|
@@ -156,7 +156,7 @@ Field schemas and setup requirements live in the [data-sources docs](https://doc
 
 ## 6. Triggering & Monitoring Ingestion
 
-The `branchly_run_data_source` method semantics are in the [mcp-server docs](https://docs.branchly.io/docs/mcp-server). The run itself is **asynchronous** — indexing and embedding happen in a background job:
+The `branchly_run_data_source` method semantics are in the [mcp-server docs](https://branchly.io/en/docs/mcp-server). The run itself is **asynchronous** — indexing and embedding happen in a background job:
 
 - **Do NOT poll or spam tools.** Even once `branchly_read_data_source_runs` is available to inspect run history, the agent must **not** ping this tool in a loop waiting for completion. Crawls take time depending on site size; polling wastes tool quota and context tokens.
 - Inform the user: *"Data source sync initiated in the background. You can track progress live in the branchly dashboard under your Data Sources tab (`https://dashboard.branchly.io/<application_id>/datasources`)."*
