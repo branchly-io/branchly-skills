@@ -6,17 +6,17 @@ Use this reference during **Phase 4 (Prompts)** and **Phase 5 (AI Actions)** of 
 
 | Topic | Canonical source |
 |---|---|
-| Prompt architecture & best practices | [docs.branchly.io/docs/prompting-guide](https://docs.branchly.io/docs/prompting-guide) |
-| AI Action / tool schemas & availability | [docs.branchly.io/docs/AI-actions](https://docs.branchly.io/docs/AI-actions) |
-| Routing vs. Output prompt model | [docs.branchly.io/docs/mcp-server](https://docs.branchly.io/docs/mcp-server) |
+| Prompt architecture & best practices | [branchly.io/en/docs/prompting-guide](https://branchly.io/en/docs/prompting-guide) |
+| AI Action / tool schemas & availability | [branchly.io/en/docs/ai-actions](https://branchly.io/en/docs/ai-actions) |
+| Routing vs. Output prompt model | [branchly.io/en/docs/mcp-server](https://branchly.io/en/docs/mcp-server) |
 
-Load each tool's full parameter schema (field lists, parameter types, `function_arguments`, `tool_config`) from `/docs/AI-actions` when you need it. This file holds the **finished prompt templates** and the **operational guidance that is not spelled out** in the docs.
+Load each tool's full parameter schema (field lists, parameter types, `function_arguments`, `tool_config`) from `/en/docs/ai-actions` when you need it. This file holds the **finished prompt templates** and the **operational guidance that is not spelled out** in the docs.
 
 ---
 
 ## 1. Prompt Architecture at a Glance
 
-branchly uses a two-tier chat prompt model (details in the [mcp-server docs](https://docs.branchly.io/docs/mcp-server)):
+branchly uses a two-tier chat prompt model (details in the [mcp-server docs](https://branchly.io/en/docs/mcp-server)):
 - **Routing Prompt / Prompt Persona (`subtype="routing_instructions"`)** — decides which AI Action to call; drives auto-evaluation. **Zero effect** on response tone/formatting.
 - **Output Instructions (`subtype="output_instructions"`)** — shapes the final response (tone, language, formatting). **Zero effect** on tool routing.
 - **Search Answering (`type="search_answering"`)** — answer synthesis for the Search interface.
@@ -112,7 +112,7 @@ branchly_create_prompt(
 
 ## 5. AI Actions (Tools) — Operational Notes
 
-Tool schemas and availability live in the [AI Actions docs](https://docs.branchly.io/docs/AI-actions) (incl. the KB tool's retrieval tuning, form field types, API parameter types, and the full tool catalog). The operational nuances the docs don't capture:
+Tool schemas and availability live in the [AI Actions docs](https://branchly.io/en/docs/ai-actions) (incl. the KB tool's retrieval tuning, form field types, API parameter types, and the full tool catalog). The operational nuances the docs don't capture:
 
 | Tool | Operational note |
 |---|---|
