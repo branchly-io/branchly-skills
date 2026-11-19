@@ -82,10 +82,15 @@ the user provides CMS access or tools.
    passage, no FAQ.
 4. **One canonical question per node.** Never create a wall-of-text FAQ
    mega-node; single-question nodes retrieve reliably, mega-nodes do not.
-5. **No duplicates.** Before creating, query the knowledge base for the question
-   terms — existing FAQ nodes carry question-shaped titles and surface on
-   query search. If a near-duplicate exists, enrich it with
-   `branchly_update_node` instead of creating a second node.
+5. **No duplicates — in the KB or on the page.** Before creating or suggesting
+   an FAQ, check two places: (a) the knowledge base for the question terms —
+   existing FAQ nodes carry question-shaped titles; and (b) the **target page
+   itself** and the site's existing FAQ page — pages often already carry
+   question-answer blocks (accordions, embedded FAQs) that a new suggestion
+   would duplicate. If the question is already answered in either place, do
+   not create a new FAQ: mark it "already covered" in the report with a
+   pointer to where it lives, and recommend enriching or linking the
+   existing answer instead.
 6. **Respect the use case, filter noise.** FAQs must fit the use case defined
    by the prompt personas (Step 0). No FAQs for out-of-scope topics (sport
    results, stocks, trivia). Exclude dev/localhost/test/gibberish queries and
@@ -224,6 +229,13 @@ branchly_list_nodes(query="<question terms>", locale="<locale>", limit=10)
 branchly_read_node(node_id="...")
 ```
 
+**Deduplicate against the page itself (Rule 5b):** before drafting, read the
+node for the target page and for the site's existing FAQ page — both are
+typically among the top cited sources. Scan their text for question-answer
+blocks: if the question is already answered there, mark it **"already
+covered"** with the URL and a pointer to the existing answer, skip the new
+entry, and recommend enriching or linking what exists.
+
 - Top cited nodes that match the topic are the preferred grounding anchors.
 - Collect the **verbatim passages** that answer the question.
 - **The 100% check (Rule 2):** can the complete answer be written strictly
@@ -346,6 +358,11 @@ option):
 | Question | Evidence (who asked, how often) | Evidence needed to unlock the answer |
 |---|---|---|
 | ... | ... | ... |
+
+## Already Covered (question exists on the page — no new FAQ)
+| Question | Where it already lives | Suggested action |
+|---|---|---|
+| ... | <page URL> | enrich / link the existing answer |
 
 ## Website FAQ Section (paste-ready)
 <Each question as a heading (###) with its answer paragraph directly below;
