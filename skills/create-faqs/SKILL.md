@@ -76,8 +76,9 @@ the site owner.
    passage, no FAQ.
 4. **One canonical question per node.** Never create a wall-of-text FAQ
    mega-node; single-question nodes retrieve reliably, mega-nodes do not.
-5. **No duplicates.** Before creating, search the existing FAQ nodes
-   (`labels=["faq"]`). If a near-duplicate exists, enrich it with
+5. **No duplicates.** Before creating, query the knowledge base for the question
+   terms — existing FAQ nodes carry question-shaped titles and surface on
+   query search. If a near-duplicate exists, enrich it with
    `branchly_update_node` instead of creating a second node.
 6. **Respect the use case, filter noise.** FAQs must fit the use case defined
    by the prompt personas (Step 0). No FAQs for out-of-scope topics (sport
@@ -190,11 +191,9 @@ For each canonical question, retrieve the website content that must carry the
 answer:
 
 ```bash
-# Search the knowledge base for relevant content
+# Search the knowledge base for relevant content — this also surfaces
+# existing FAQ nodes, whose question-shaped titles match the query
 branchly_list_nodes(query="<question terms>", locale="<locale>", limit=10)
-
-# Check for an existing FAQ node saying the same thing
-branchly_list_nodes(labels=["faq"], query="<question terms>", limit=10)
 
 # Read the authoritative source content
 branchly_read_node(node_id="...")
@@ -261,15 +260,15 @@ Create one node per question:
 branchly_create_node(
   title={"en": "<canonical question>"},
   text={"en": "<verified answer>"},
-  label="faq",
   source="<target page URL, if the FAQ belongs to a specific page>"
 )
 ```
 
 - `title` and `text` are locale-keyed maps — a multi-locale FAQ is one node:
   `text={"en": "...", "de": "..."}`.
-- `label="faq"` keeps FAQ nodes filterable and maintainable
-  (`branchly_list_nodes(labels=["faq"])`).
+- Do not pass `label`: node labels are a fixed set (`content`, `contact`, …)
+  and FAQ nodes use the default `content`. Their question-shaped titles are
+  what make them findable again (Rule 5).
 - Enriching an existing node instead:
   `branchly_update_node(node_id="...", text={"en": "<improved answer>"})`.
 
@@ -348,7 +347,7 @@ Google retired FAQ rich results in May 2026 — do not promise rich snippets.*
   ads and quote terribly when AI engines extract them.
 - **One question per node.** A wall-of-text FAQ node destroys retrieval; one
   canonical question per node surfaces reliably.
-- **Deduplicate before creating.** Always check `labels=["faq"]` first; update
+- **Deduplicate before creating.** Query the question terms first; update
   existing nodes instead of creating near-duplicates.
 - **Don't copy crawler noise into answers.** Read the node text — if it is
   boilerplate-heavy, flag the source instead of laundering the noise into an FAQ.
