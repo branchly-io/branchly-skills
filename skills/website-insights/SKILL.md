@@ -15,7 +15,7 @@ description: |
 license: MIT
 metadata:
   author: branchly-io
-  version: "1.0"
+  version: "1.0.0"
 ---
 
 ## Website Insights Workflow for branchly Applications
