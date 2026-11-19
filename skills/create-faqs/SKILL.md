@@ -2,10 +2,11 @@
 name: create-faqs
 description: |
   Create and publish FAQ entries for a branchly-powered website from real visitor
-  questions. Mines actual searches and chat sessions for recurring questions, grounds
-  every answer in existing knowledge-base content, publishes FAQ nodes via the
-  branchly MCP server, and delivers a website-ready FAQ section with FAQPage
-  JSON-LD. Downstream of content-ideas.
+  demand signals. Consumes question sets and demand evidence from content-ideas
+  (searches, classification topics, tags, interaction sources, top cited nodes)
+  or mines them via the branchly MCP server, verifies every answer 100% against
+  website content — citing the exact source passages — and publishes FAQ nodes
+  plus a website-ready FAQ section with FAQPage JSON-LD.
 
   Triggers when user mentions:
   - "create FAQs" / "generate FAQs" / "add an FAQ section to page X"
@@ -21,27 +22,33 @@ metadata:
 
 ## Create FAQs Workflow for branchly Applications
 
-Use the branchly MCP server throughout this workflow: mine what visitors actually
-ask, ground every answer in existing knowledge-base content, and publish the
-finished FAQs as knowledge-base nodes so chat and search answer them instantly.
+Use the branchly MCP server throughout this workflow: collect the demand signals
+that show where FAQs are needed, verify every answer 100% against website
+content, and publish the finished FAQs as knowledge-base nodes so chat and search
+answer them instantly.
 
 ---
 
 ## Goal
 
-Turn real visitor questions into **published, grounded FAQ entries**:
+Turn real visitor demand into **published, fully verified FAQ entries**:
 
-1. **Questions come from real demand** — searches and chat sessions, not guesswork.
-2. **Answers are grounded** — written from retrieved knowledge-base content, so the
-   FAQ page and the AI assistant never contradict each other.
+1. **Questions come from real demand signals** — searches, chat sessions,
+   classification topics, tags, interaction sources, and top cited nodes,
+   ideally aggregated upstream by `content-ideas`.
+2. **Answers are 100% verified** — every answer is written strictly from website
+   content retrieved via MCP and ships with the verbatim source passages that
+   verify it. The FAQ page and the AI assistant can never contradict each other.
 3. **Published via MCP** — each FAQ becomes a knowledge-base node
    (`branchly_create_node`), so the assistant answers the question immediately.
 4. **Website-ready output** — a paste-ready FAQ section plus FAQPage JSON-LD for
    search-engine rich results.
 
-**Position in the skill family:** `content-ideas` identifies which pages need FAQs
-and which questions to answer (upstream input). This skill writes and publishes
-the FAQ entries. `optimize-application` handles retrieval tuning;
+**Position in the skill family:** `content-ideas` aggregates the demand signals
+(top searches, classification topics, tags, interaction sources, top cited
+sources) into prioritized FAQ recommendations with target pages. This skill
+consumes that output — or gathers the same signals itself — then verifies,
+writes, and publishes. `optimize-application` handles retrieval tuning;
 `website-insights` measures the impact.
 
 **Scope:** This skill creates and updates FAQ *nodes* via MCP. It does not edit
@@ -52,38 +59,44 @@ the site owner.
 
 ## Rules — Non-Negotiable
 
-1. **Real questions only.** FAQ questions come from actual visitor searches and
-   sessions (or an explicit question list provided by the user, e.g. from
+1. **Real questions only.** FAQ questions come from actual visitor demand
+   signals (or an explicit question list provided by the user, e.g. from
    `content-ideas`). Never invent questions. Keep the visitor's phrasing — clean
    it for grammar only.
-2. **Ground every answer.** Write answers ONLY from content retrieved via
-   `branchly_list_nodes` / `branchly_read_node` (or facts the user provided). If
-   nothing grounds the answer, mark the question "needs human input" and collect
-   it in the report. Never fabricate.
-3. **One canonical question per node.** Never create a wall-of-text FAQ mega-node;
-   single-question nodes retrieve reliably, mega-nodes do not.
-4. **No duplicates.** Before creating, search the existing FAQ nodes
+2. **100% verified answers only.** Create an FAQ only when the *complete*
+   answer — every fact, number, price, name, and condition — can be verified
+   from website content retrieved via `branchly_list_nodes` /
+   `branchly_read_node`. If any part cannot be verified, the question goes to
+   "needs human input". Never publish a partially verified answer; never
+   fabricate, round off, or extrapolate.
+3. **Cite the passages.** Every suggested FAQ answer must include the verbatim
+   passage(s) it rests on, plus the source node ID, title, and page URL. No
+   passage, no FAQ.
+4. **One canonical question per node.** Never create a wall-of-text FAQ
+   mega-node; single-question nodes retrieve reliably, mega-nodes do not.
+5. **No duplicates.** Before creating, search the existing FAQ nodes
    (`labels=["faq"]`). If a near-duplicate exists, enrich it with
    `branchly_update_node` instead of creating a second node.
-5. **Respect scope, filter noise.** No FAQs for out-of-scope topics (sport
+6. **Respect the use case, filter noise.** FAQs must fit the use case defined
+   by the prompt personas (Step 0). No FAQs for out-of-scope topics (sport
    results, stocks, trivia). Exclude dev/localhost/test/gibberish queries and
    report them as "removed as test/technical noise (n)".
-6. **Verify after publishing.** Re-query with the visitors' original phrasings;
+7. **Verify after publishing.** Re-query with the visitors' original phrasings;
    every phrasing variant must surface the new node. If it does not, tighten the
    question title with the keywords visitors actually type.
-7. **Publish in the right locales.** `text` is a locale-keyed map. Publish each
-   FAQ in every locale it was asked in (within `valid_locales`); a question asked
-   in German gets a German answer.
+8. **Publish in the right locales.** `text` is a locale-keyed map. Publish each
+   FAQ in every locale it was asked in (within `valid_locales`); a question
+   asked in German gets a German answer.
 
 ---
 
-## Step 0 — Context
+## Step 0 — Context & Use Case
 
 ```bash
 # App: name, domains, valid_locales
 branchly_get_application()
 
-# Active prompts: tone, audience, scope
+# Prompt personas for chat AND search — the use case definition
 branchly_list_prompts(is_active=true)
 
 # Data sources: which content is authoritative
@@ -93,27 +106,44 @@ branchly_list_data_sources()
 branchly_list_tools(active=true)
 ```
 
-Establish: domain, tone of voice, `valid_locales`, and which data sources carry
-authoritative content for grounding.
+Read the **prompt personas for both chat and search** — especially the routing
+instructions. They define the use case: domain positioning, target audience,
+in-scope topics, out-of-scope guardrails, and tone of voice. The search persona
+often serves a narrower scope than chat; an FAQ that fits one interface may be
+out of scope for the other. Establish: domain, use case per interface, tone,
+`valid_locales`, and the data sources that carry authoritative website content.
 
 ---
 
-## Step 1 — Collect the Real Questions
+## Step 1 — Collect the Demand Signals
 
-If the user provides a question list (e.g. the FAQ Recommendations from
-`content-ideas`), use it and continue with Step 2 — but still ground every
-answer in Step 3.
+**Preferred input: the `content-ideas` report.** It already aggregates the
+signals that decide where FAQs are needed:
 
-Otherwise, mine the analytics (default: trailing 30 days):
+- top searches and unanswered sessions → *what visitors ask, in their words*
+- classification topics + tags → *which themes recur often enough to cover*
+- interaction sources → *which pages provoke questions → FAQ target pages*
+- top cited nodes → *which existing content carries the answers*
+
+If no `content-ideas` output is at hand, pull the same signals directly
+(default: trailing 30 days):
 
 ```bash
-# What visitors type into search and chat
+# Exact question phrasings
 branchly_get_top_searches(time_filter="<start>,<end>", limit=20)
 
-# Which pages provoke the questions (→ target page for each FAQ)
+# Recurring themes worth covering
+branchly_get_trending_classifications(classification_type="topic", time_filter="<start>,<end>")
+branchly_get_trending_classifications(classification_type="intent", time_filter="<start>,<end>")
+branchly_get_top_tags(time_filter="<start>,<end>", limit=15)
+
+# Which pages need the FAQ section
 branchly_get_top_interaction_sources(time_filter="<start>,<end>", limit=15)
 
-# How many questions end without a proper answer
+# Load-bearing content that already answers most demand
+branchly_get_top_cited_sources(time_filter="<start>,<end>", limit=15)
+
+# How much unanswered demand exists
 branchly_get_answer_type_distribution(time_filter="<start>,<end>")
 
 # The actual unanswered and follow-up conversations
@@ -127,13 +157,14 @@ branchly_read_session_detail(session_id="...")
 ```
 
 **What to look for:**
-- `no_knowledge` / `outside_scope` sessions = unanswered demand, phrased in the
-  visitor's own words.
 - `follow_up_question` sessions are gold: the visitor got an answer but still
   needed more — exactly the nuance an FAQ should capture.
-- Interaction sources tell you **where** each question lives: the page the
-  visitor was on is the page that needs the FAQ section (same target-page logic
-  as `content-ideas`).
+- A question whose theme appears in **several signals at once** — a search query,
+  a trending topic or tag, and an interaction source all pointing at the same
+  page — is the strongest FAQ candidate.
+- A recurring question that overlaps a **top cited node** means the content
+  exists but visitors still ask: prime FAQ material, and that node is the
+  grounding anchor for the answer.
 
 ---
 
@@ -141,18 +172,20 @@ branchly_read_session_detail(session_id="...")
 
 - Merge phrasing variants into **one canonical question** (keep the most natural
   visitor phrasing).
-- Rank by frequency and journey value (Awareness → Consideration →
+- Rank by frequency, cross-signal confirmation (how many independent signals
+  point at this question/theme), and journey value (Awareness → Consideration →
   Booking/Contact → Support).
-- Filter noise per Rules 1 and 5; report exclusions.
+- Filter noise per Rules 1 and 6; report exclusions.
 - Record the **target page** for each question (from interaction sources).
 - Small volumes are fine for FAQs: a single real question justifies an
   evergreen, in-scope FAQ. Frequency sets priority, not inclusion.
 
 ---
 
-## Step 3 — Ground Every Answer
+## Step 3 — Verify Every Answer Against the Website
 
-For each canonical question, retrieve the content the answer must be based on:
+For each canonical question, retrieve the website content that must carry the
+answer:
 
 ```bash
 # Search the knowledge base for relevant content
@@ -165,22 +198,27 @@ branchly_list_nodes(labels=["faq"], query="<question terms>", limit=10)
 branchly_read_node(node_id="...")
 ```
 
-- Write the answer from the retrieved node text — the same content the assistant
-  retrieves, so the FAQ page and the chatbot can never contradict each other.
+- Top cited nodes that match the topic are the preferred grounding anchors.
+- Collect the **verbatim passages** that answer the question.
+- **The 100% check (Rule 2):** can the complete answer be written strictly
+  from these passages — every fact, number, price, name, and condition stated
+  in them? Yes → publishable. No, or only partially → mark the question
+  **"needs human input"** and collect it for the report. Do not blend passages
+  into claims they do not state.
 - Existing near-duplicate FAQ node → plan a `branchly_update_node` (enrich the
   text) instead of a create.
-- Nothing found → mark the question **"needs human input"** and collect it
-  separately for the report (Rule 2). Do not write an answer.
 
 ---
 
 ## Step 4 — Write the FAQ Entries
 
-For each publishable question, prepare:
+For each verified question, prepare:
 
 - **Question:** the canonical visitor phrasing (Rule 1).
-- **Answer:** 2–4 sentences, grounded in Step 3 content, in the tone from the
-  prompts; include the source page URL when the node has one.
+- **Answer:** 2–4 sentences, strictly verified (Rule 2), in the tone from the
+  prompt personas.
+- **Verification (Rule 3):** source node ID + title + page URL, and the verbatim
+  passage(s) the answer rests on.
 - **Locales:** every locale the question appeared in (within `valid_locales`).
 - **Target page:** the website page this FAQ belongs to (for the section in
   Step 6).
@@ -194,7 +232,7 @@ Create one node per question:
 ```bash
 branchly_create_node(
   title={"en": "<canonical question>"},
-  text={"en": "<grounded answer>"},
+  text={"en": "<verified answer>"},
   label="faq",
   source="<target page URL, if the FAQ belongs to a specific page>"
 )
@@ -207,7 +245,7 @@ branchly_create_node(
 - Enriching an existing node instead:
   `branchly_update_node(node_id="...", text={"en": "<improved answer>"})`.
 
-Then **verify** (Rule 6):
+Then **verify** (Rule 7):
 
 ```bash
 branchly_list_nodes(query="<original visitor phrasing>", locale="en", limit=5)
@@ -221,21 +259,29 @@ re-verify.
 
 ## Step 6 — Deliver
 
-Produce the FAQ creation report:
+Produce the FAQ creation report with an **auditable verification section**:
 
 ```markdown
 # FAQ Creation Report — <Domain>
 
-**Question source:** <analytics window | user-provided list from content-ideas>
-**Result:** N FAQ nodes created · M nodes updated · K questions flagged "needs human input"
+**Question source:** <content-ideas output | analytics window>
+**Result:** N FAQ nodes created · M nodes updated · K questions "needs human input"
 **Noise removed:** <n> test/technical queries excluded from the question pool.
 
+## Published / Updated FAQs
 | # | Question | Locale(s) | Node ID | Status | Target page |
 |---|---|---|---|---|---|
-| 1 | ... | en, de | ... | created / updated / needs human input | /pricing |
+| 1 | ... | en, de | ... | created / updated | /pricing |
 
-## Needs Human Input (no grounded content yet)
-| Question | Evidence (who asked, how often) | Suggested owner |
+## Answer Verification (source passages per FAQ)
+### <Question 1>
+- **Answer:** <the verified answer>
+- **Source:** node `<node-id>` — <node title> — <page URL>
+- **Verbatim passage:**
+  > "<the exact passage from the website content that verifies this answer>"
+
+## Needs Human Input (could not be 100% verified from the website)
+| Question | Evidence (who asked, how often) | What is missing to verify |
 |---|---|---|
 | ... | ... | ... |
 
@@ -251,7 +297,7 @@ Produce the FAQ creation report:
     {
       "@type": "Question",
       "name": "<canonical question>",
-      "acceptedAnswer": { "@type": "Answer", "text": "<grounded answer>" }
+      "acceptedAnswer": { "@type": "Answer", "text": "<verified answer>" }
     }
   ]
 }
@@ -262,17 +308,20 @@ Produce the FAQ creation report:
 
 ## Pitfalls to Avoid
 
-- **Never invent answers.** Ground every answer in retrieved nodes or user-provided
-  facts; ungrounded questions go to "needs human input".
+- **Never publish a partially verified answer.** If any claim in the answer is
+  not backed by a retrieved passage, the question goes to "needs human input".
+- **No passage, no FAQ.** Always attach the verbatim source passages — the site
+  owner must be able to audit where every answer comes from.
 - **One question per node.** A wall-of-text FAQ node destroys retrieval; one
   canonical question per node surfaces reliably.
 - **Deduplicate before creating.** Always check `labels=["faq"]` first; update
   existing nodes instead of creating near-duplicates.
 - **Don't copy crawler noise into answers.** Read the node text — if it is
   boilerplate-heavy, flag the source instead of laundering the noise into an FAQ.
-- **Respect the domain scope.** No FAQs for sport results, stock prices, or
-  trivia questions.
-- **Never skip the post-publish check.** A published FAQ that does not retrieve is
-  invisible to the assistant and the search interface.
+- **Respect the use case from the prompt personas.** No FAQs for sport results,
+  stock prices, trivia, or anything the chat and search personas declare
+  out of scope.
+- **Never skip the post-publish check.** A published FAQ that does not retrieve
+  is invisible to the assistant and the search interface.
 - **Don't ignore locales.** A German question deserves a German answer; use the
   locale-keyed `text` map.
