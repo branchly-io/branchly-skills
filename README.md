@@ -38,6 +38,17 @@ Analyze branchly analytics to generate prioritized website content recommendatio
 - "find content gaps on our website"
 - "improve AI search content" / "what should we write about next"
 
+### `website-insights`
+
+Generate a plain-language, CMO-ready analytics insight report about what is happening on a branchly-powered website: engagement, customer demand signals, friction, and funnel and market opportunities. Output is executive-level and action-first (content plans, funnel fixes, campaign/geography inputs).
+
+**Triggers when you mention:**
+- "website analytics report" / "what is happening on our website"
+- "customer insights" / "what are users asking"
+- "marketing report" / "CMO dashboard"
+- "how is our chatbot/AI search performing"
+- "where are we losing users" / "what should marketing focus on"
+
 ## Installation
 
 ### Install all skills at once (recommended)
@@ -68,6 +79,7 @@ Or install a specific skill directly:
 npx skills add branchly-io/branchly-skills --skill content-ideas
 npx skills add branchly-io/branchly-skills --skill optimize-application
 npx skills add branchly-io/branchly-skills --skill setup-application
+npx skills add branchly-io/branchly-skills --skill website-insights
 ```
 
 ## Requirements
