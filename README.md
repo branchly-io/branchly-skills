@@ -49,6 +49,17 @@ Generate a plain-language, CMO-ready analytics insight report about what is happ
 - "how is our chatbot/AI search performing"
 - "where are we losing users" / "what should marketing focus on"
 
+### `create-faqs`
+
+Create and publish FAQ entries for a branchly-powered website from real visitor questions. Mines actual searches and chat sessions for recurring questions, grounds every answer in existing knowledge-base content, publishes FAQ nodes via the branchly MCP server, and delivers a website-ready FAQ section with FAQPage JSON-LD.
+
+**Triggers when you mention:**
+- "create FAQs" / "generate FAQs" / "add an FAQ section to page X"
+- "answer the questions visitors keep asking"
+- "turn our chat/search questions into FAQs"
+- "publish FAQ nodes" / "write the FAQ copy"
+- "use the FAQ question list from content-ideas"
+
 ## Installation
 
 ### Install all skills at once (recommended)
@@ -77,6 +88,7 @@ Or install a specific skill directly:
 
 ```bash
 npx skills add branchly-io/branchly-skills --skill content-ideas
+npx skills add branchly-io/branchly-skills --skill create-faqs
 npx skills add branchly-io/branchly-skills --skill optimize-application
 npx skills add branchly-io/branchly-skills --skill setup-application
 npx skills add branchly-io/branchly-skills --skill website-insights

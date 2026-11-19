@@ -4,7 +4,7 @@ description: |
   Analyze branchly MCP analytics to generate prioritized website content recommendations
   (page updates, targeted FAQ question lists, and new article/blog topics).
   Helps website owners and marketing teams optimize their website content for AI search
-  and user clarity. Output feeds downstream skills (e.g. generate-faqs, write-article).
+  and user clarity. Output feeds downstream skills (e.g. create-faqs, write-article).
 
   Triggers when user mentions:
   - "what content should we create" / "content ideas"
@@ -15,7 +15,7 @@ description: |
 license: MIT
 metadata:
   author: branchly-io
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 ## Website Content Ideas Workflow for branchly Applications
@@ -32,7 +32,7 @@ teams. The goal is to identify exactly **what content, sections, FAQs, or new pa
 should be added or updated on their website to:
 1. Directly answer recurring visitor questions and search intents.
 2. Improve retrieval clarity and semantic visibility for AI Search and chat.
-3. Serve as structured input for downstream content-generation skills (such as `generate-faqs` or article writers).
+3. Serve as structured input for downstream content-generation skills (such as `create-faqs` or article writers).
 
 **Scope:** This skill is strictly **analytical and strategic (Read-Only)**. It identifies
 and prioritizes content opportunities and lists specific question sets. It does **not**
@@ -125,7 +125,7 @@ Classify the finding:
 
 Group your findings into three clear editorial packages:
 
-### 1. FAQ Recommendations (Ready for `generate-faqs` skill)
+### 1. FAQ Recommendations (Ready for `create-faqs` skill)
 Identify pages where adding an on-page FAQ accordion or section directly resolves visitor friction.
 For each recommendation, provide:
 - **Target Page URL:** The exact page where the FAQ section should be placed.
@@ -168,7 +168,7 @@ Deliver a structured, human-readable report:
 ---
 
 ## 2. Priority 1 — Targeted FAQ Question Sets (Ready for Downstream FAQ Skill)
-*Use these question sets with the FAQ generation skill to produce structured FAQ accordions.*
+*Use these question sets with the `create-faqs` skill to produce structured FAQ accordions.*
 
 ### A. Target Page: `https://.../page-path`
 - **Recommended FAQ Questions:**
@@ -195,7 +195,7 @@ Deliver a structured, human-readable report:
 ---
 
 ## 5. Next Steps
-- Pass the FAQ question lists to the `generate-faqs` skill for copy generation.
+- Pass the FAQ question lists to the `create-faqs` skill for copy generation and publishing.
 - Review page update recommendations with the content/marketing team.
 ```
 
