@@ -200,6 +200,11 @@ branchly_read_session_detail(session_id="...")
   Booking/Contact → Support).
 - Filter noise per Rules 1 and 6; report exclusions.
 - Record the **target page** for each question (from interaction sources).
+- Group the questions into **fact families** (the pricing facts, the
+  compatibility facts, the cancellation facts) and give each family **one
+  owning target page** — AI engines fan a single prompt out into several fact
+  lookups, and one strong page can serve them all. Never a new page per
+  question variant.
 - Small volumes are fine for FAQs: a single real question justifies an
   evergreen, in-scope FAQ. Frequency sets priority, not inclusion.
 
@@ -235,8 +240,11 @@ branchly_read_node(node_id="...")
 
 For each verified question, prepare:
 
-- **Question:** the canonical visitor phrasing (Rule 1).
-- **Answer:** 2–4 sentences (~40–60 words), strictly verified (Rule 2), in the
+- **Question:** the canonical visitor phrasing (Rule 1), kept as a natural
+  search-style question — question words (what, how, why, when, where, who,
+  which), "How do I…" not "How does one…" — because visitors who never opened
+  the chat will type the same question into search.
+- **Answer:** 2–4 sentences (~50–100 words), strictly verified (Rule 2), in the
   tone from the prompt personas.
 - **Verification (Rule 3):** source node ID + title + page URL, and the verbatim
   passage(s) the answer rests on.
@@ -247,14 +255,16 @@ For each verified question, prepare:
 **Answer style (non-negotiable):**
 
 - **Answer first.** The first sentence answers the question. Conditions and
-  details follow — never lead with throat-clearing.
+  details follow — never lead with throat-clearing. Answer boxes and AI engines
+  lift the first sentence verbatim, so it must carry the answer alone.
 - **Self-contained and extractable.** AI search and assistants quote answer
   blocks verbatim; each answer must stand alone without the question, the
   page, or surrounding text.
 - **Specific over vague.** Use the exact numbers, names, prices, and timeframes
   from the verified passages. Never abstract them into "fast", "easy",
   "flexible", or "save time" — a generic answer helps no one and retrieves
-  worse.
+  worse. Sourced figures also raise AI citation rates: when the passage states
+  a number, keep the number (and where it comes from) in the answer.
 - **Customer language.** Mirror the visitor's own words where the passages
   allow — other visitors search and ask the same way.
 - **The swap test.** If a competitor could publish the same answer unchanged,
@@ -338,7 +348,9 @@ option):
 | ... | ... | ... |
 
 ## Website FAQ Section (paste-ready)
-<Markdown accordion with questions + answers, grouped by target page>
+<Each question as a heading (###) with its answer paragraph directly below;
+related questions grouped on their owning target page — one owning page per
+fact family, never a page per question>
 
 ## FAQPage Structured Data (machine-readable, optional)
 *Valid Schema.org that keeps the FAQ parseable by AI assistants and crawlers.
