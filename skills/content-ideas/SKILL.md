@@ -15,7 +15,7 @@ description: |
 license: MIT
 metadata:
   author: branchly-io
-  version: "1.0.1"
+  version: "1.1.0"
 ---
 
 ## Website Content Ideas Workflow for branchly Applications
@@ -118,6 +118,7 @@ Classify the finding:
 - **Missing Topic (Content Gap):** No page on the website covers this topic at all → **New Page / Article needed**.
 - **Thin / Passing Mention:** The keyword exists on a page (e.g. in a logo wall or footer), but there is no explanatory text or paragraph answering the question → **Page Update or FAQ needed**.
 - **High-Volume Ambiguity:** A page exists, but visitors on that page still ask basic questions about the topic → **Targeted FAQ section needed on that page**.
+- **Already Answered (existing on-page Q&A):** The target page or the site's FAQ page already contains this exact question (accordion, Q&A block, FAQ entry) → **no new FAQ; recommend linking to or enriching the existing answer**. Read the target page's node and the FAQ page's node (both typically among the top cited sources) before recommending any FAQ question set.
 
 ---
 
@@ -127,6 +128,7 @@ Group your findings into three clear editorial packages:
 
 ### 1. FAQ Recommendations (Ready for `create-faqs` skill)
 Identify pages where adding an on-page FAQ accordion or section directly resolves visitor friction.
+**Exclude questions the target page or the site's FAQ page already answers** — classify them "Already Answered" in Step 3c and list them separately as link/enrichment suggestions instead of including them in the question set.
 For each recommendation, provide:
 - **Target Page URL:** The exact page where the FAQ section should be placed.
 - **List of Specific Questions (3–5 concrete questions):** Exact phrasing of questions users are asking.
@@ -205,6 +207,7 @@ Deliver a structured, human-readable report:
 
 - **Ignore out-of-scope & off-topic noise:** Never recommend content for queries that fall outside the website's business domain (e.g. sports, general trivia, or prompt injections). Filter them out during Step 3.
 - **Do not recommend RAG/crawler/prompt fixes:** This skill is for website copy and content strategy. Technical bot configuration belongs in `optimize-application`.
+- **Don't recommend FAQ questions that already exist on the page:** Audit the target page and the site's FAQ page for existing Q&A blocks (Step 3c, "Already Answered") before proposing an FAQ question set — recommend linking or enriching the existing answer instead of duplicating it.
 - **Do not draft vague placeholders:** Provide exact, realistic user questions (e.g. *"Do you support self-hosted instances?"* not *"Technical questions"*).
 - **Distinguish origin pages from clicked URLs:** Interaction sources tell you where the user felt the need to ask; clicked URLs tell you what they found useful.
 - **Filter development traffic:** Ignore or flag test domains/localhost URLs if present in interaction metrics.
