@@ -1,12 +1,13 @@
 ---
 name: create-faqs
 description: |
-  Create and publish FAQ entries for a branchly-powered website from real visitor
-  demand signals. Consumes question sets and demand evidence from content-ideas
+  Create FAQ entries for a branchly-powered website from real visitor demand
+  signals. Consumes question sets and demand evidence from content-ideas
   (searches, classification topics, tags, interaction sources, top cited nodes)
   or mines them via the branchly MCP server, verifies every answer 100% against
-  website content — citing the exact source passages — and publishes FAQ nodes
-  plus a website-ready FAQ section with FAQPage JSON-LD.
+  website content — citing the exact source passages — and delivers the FAQs in
+  the output format chosen upfront: a file, branchly nodes, or CMS-ready page
+  content.
 
   Triggers when user mentions:
   - "create FAQs" / "generate FAQs" / "add an FAQ section to page X"
@@ -24,8 +25,9 @@ metadata:
 
 Use the branchly MCP server throughout this workflow: collect the demand signals
 that show where FAQs are needed, verify every answer 100% against website
-content, and publish the finished FAQs as knowledge-base nodes so chat and search
-answer them instantly.
+content, and deliver the finished FAQs in the output format the user chooses
+upfront — optionally as knowledge-base nodes, so chat and search answer them
+instantly.
 
 ---
 
@@ -39,8 +41,11 @@ Turn real visitor demand into **published, fully verified FAQ entries**:
 2. **Answers are 100% verified** — every answer is written strictly from website
    content retrieved via MCP and ships with the verbatim source passages that
    verify it. The FAQ page and the AI assistant can never contradict each other.
-3. **Published via MCP** — each FAQ becomes a knowledge-base node
-   (`branchly_create_node`), so the assistant answers the question immediately.
+3. **Output format chosen upfront** — before anything is generated, the user
+   picks the delivery: a **file**, **FAQ nodes in branchly**
+   (`branchly_create_node`, so the assistant answers the question immediately),
+   or **CMS-ready content** for the customer's page. Publishing to branchly is
+   optional, never the default.
 4. **Website-ready output** — a paste-ready FAQ section with extractable,
    self-contained answer blocks, plus optional FAQPage JSON-LD for machine
    readability (AI assistants parse it; Google retired FAQ rich results in
@@ -53,9 +58,10 @@ consumes that output — or gathers the same signals itself — then verifies,
 writes, and publishes. `optimize-application` handles retrieval tuning;
 `website-insights` measures the impact.
 
-**Scope:** This skill creates and updates FAQ *nodes* via MCP. It does not edit
-website pages — the website FAQ section is delivered as paste-ready Markdown for
-the site owner.
+**Scope:** This skill may create and update FAQ *nodes* via MCP — only when the
+user chose that output format. It does not edit website pages on its own; page
+delivery is paste-ready content for the site owner, or a direct CMS upload when
+the user provides CMS access or tools.
 
 ---
 
@@ -84,16 +90,30 @@ the site owner.
    by the prompt personas (Step 0). No FAQs for out-of-scope topics (sport
    results, stocks, trivia). Exclude dev/localhost/test/gibberish queries and
    report them as "removed as test/technical noise (n)".
-7. **Verify after publishing.** Re-query with the visitors' original phrasings;
-   every phrasing variant must surface the new node. If it does not, tighten the
-   question title with the keywords visitors actually type.
-8. **Publish in the right locales.** `text` is a locale-keyed map. Publish each
-   FAQ in every locale it was asked in (within `valid_locales`); a question
-   asked in German gets a German answer.
+7. **Verify after publishing to branchly.** Re-query with the visitors'
+   original phrasings; every phrasing variant must surface the new node. If it
+   does not, tighten the question title with the keywords visitors actually
+   type.
+8. **Deliver in the right locales.** Provide each FAQ in every locale it was
+   asked in (within `valid_locales`) — a question asked in German gets a German
+   answer, whatever the output format.
 
 ---
 
-## Step 0 — Context & Use Case
+## Step 0 — Context, Use Case & Output Format
+
+**Ask before you start: which output format does the user want?** This choice is
+made before any FAQ is written — it decides whether Step 5 runs and how Step 6
+packages the result:
+
+| Option | What gets delivered |
+|---|---|
+| **File** | The FAQ set as files in the working directory (Markdown report and/or CSV/JSON) for the site owner to place anywhere |
+| **branchly nodes** | One node per question via `branchly_create_node` (Step 5), so chat and search answer instantly |
+| **CMS / customer's page** | The FAQ section formatted for the customer's CMS (paste-ready HTML/Markdown for their page); uploaded directly only if the user provides CMS access or tools |
+
+Publishing to branchly is optional, never the default. If the user is unsure,
+default to the file option — nothing is published anywhere without their say-so.
 
 ```bash
 # App: name, domains, valid_locales
@@ -252,9 +272,10 @@ For each verified question, prepare:
 
 ---
 
-## Step 5 — Publish and Verify via MCP
+## Step 5 — Publish to branchly (only if chosen)
 
-Create one node per question:
+Run this step **only** when the user chose branchly nodes as the output format
+in Step 0; otherwise skip to Step 6. Create one node per question:
 
 ```bash
 branchly_create_node(
@@ -286,7 +307,11 @@ re-verify.
 
 ## Step 6 — Deliver
 
-Produce the FAQ creation report with an **auditable verification section**:
+Produce the FAQ creation report with an **auditable verification section**.
+Package the FAQ content according to the format chosen in Step 0 — save files to
+the working directory (file option), list the created node IDs (branchly
+option), or expand the website section into the customer's CMS format (CMS
+option):
 
 ```markdown
 # FAQ Creation Report — <Domain>

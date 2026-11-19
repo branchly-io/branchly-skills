@@ -51,7 +51,7 @@ Generate a plain-language, CMO-ready analytics insight report about what is happ
 
 ### `create-faqs`
 
-Create and publish FAQ entries for a branchly-powered website from real visitor demand signals. Consumes question sets and demand evidence from content-ideas (searches, classification topics, tags, interaction sources, top cited nodes), reads the chat and search prompt personas for the use case, verifies every answer 100% against website content with cited source passages, publishes FAQ nodes via the branchly MCP server, and delivers a website-ready FAQ section with FAQPage JSON-LD.
+Create FAQ entries for a branchly-powered website from real visitor demand signals. Consumes question sets and demand evidence from content-ideas (searches, classification topics, tags, interaction sources, top cited nodes), reads the chat and search prompt personas for the use case, verifies every answer 100% against website content with cited source passages, and delivers the FAQs in the output format chosen upfront — a file, branchly nodes, or CMS-ready page content.
 
 **Triggers when you mention:**
 - "create FAQs" / "generate FAQs" / "add an FAQ section to page X"
