@@ -11,6 +11,9 @@ description: |
   - "debug my chatbot" or "chatbot retrieval issue"
   - "improve retrieval" or "fix bot responses"
 license: MIT
+metadata:
+  author: branchly-io
+  version: "1.3.0"
 ---
 
 ## Optimization Workflow for branchly Applications
