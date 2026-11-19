@@ -13,6 +13,9 @@ description: |
   - "find content gaps on our website"
   - "improve AI search content" / "what should we write about next"
 license: MIT
+metadata:
+  author: branchly-io
+  version: "1.0.0"
 ---
 
 ## Website Content Ideas Workflow for branchly Applications

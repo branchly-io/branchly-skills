@@ -13,6 +13,9 @@ description: |
   - "initial branchly configuration"
   - "configure and test my branchly chatbot"
 license: MIT
+metadata:
+  author: branchly-io
+  version: "1.0.1"
 ---
 
 ## Setup Application Workflow for branchly Applications
