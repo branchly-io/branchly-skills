@@ -41,8 +41,10 @@ Turn real visitor demand into **published, fully verified FAQ entries**:
    verify it. The FAQ page and the AI assistant can never contradict each other.
 3. **Published via MCP** — each FAQ becomes a knowledge-base node
    (`branchly_create_node`), so the assistant answers the question immediately.
-4. **Website-ready output** — a paste-ready FAQ section plus FAQPage JSON-LD for
-   search-engine rich results.
+4. **Website-ready output** — a paste-ready FAQ section with extractable,
+   self-contained answer blocks, plus optional FAQPage JSON-LD for machine
+   readability (AI assistants parse it; Google retired FAQ rich results in
+   May 2026 — the value is the answer content itself).
 
 **Position in the skill family:** `content-ideas` aggregates the demand signals
 (top searches, classification topics, tags, interaction sources, top cited
@@ -215,13 +217,39 @@ branchly_read_node(node_id="...")
 For each verified question, prepare:
 
 - **Question:** the canonical visitor phrasing (Rule 1).
-- **Answer:** 2–4 sentences, strictly verified (Rule 2), in the tone from the
-  prompt personas.
+- **Answer:** 2–4 sentences (~40–60 words), strictly verified (Rule 2), in the
+  tone from the prompt personas.
 - **Verification (Rule 3):** source node ID + title + page URL, and the verbatim
   passage(s) the answer rests on.
 - **Locales:** every locale the question appeared in (within `valid_locales`).
 - **Target page:** the website page this FAQ belongs to (for the section in
   Step 6).
+
+**Answer style (non-negotiable):**
+
+- **Answer first.** The first sentence answers the question. Conditions and
+  details follow — never lead with throat-clearing.
+- **Self-contained and extractable.** AI search and assistants quote answer
+  blocks verbatim; each answer must stand alone without the question, the
+  page, or surrounding text.
+- **Specific over vague.** Use the exact numbers, names, prices, and timeframes
+  from the verified passages. Never abstract them into "fast", "easy",
+  "flexible", or "save time" — a generic answer helps no one and retrieves
+  worse.
+- **Customer language.** Mirror the visitor's own words where the passages
+  allow — other visitors search and ask the same way.
+- **The swap test.** If a competitor could publish the same answer unchanged,
+  it is too generic: tighten it with the specifics from the verified passage.
+- **No AI tells.** No "it's not X, it's Y" contrast reveals, no "no X, no Y,
+  no Z" negation lists, no self-answered questions or colon reveals, no stock
+  openers ("In today's fast-paced world…"), no sentences trailing into extra
+  comma clauses. Plain, declarative sentences; active voice; no weak
+  intensifiers ("very", "really"). The FAQ questions themselves are fine as
+  questions — that is the format.
+- **Declined answers name their unlock.** When a question lands in "needs
+  human input", state exactly what evidence would unlock it (a policy page, a
+  price list, a spec table, a support macro) — an unlock path is an action
+  item; without one it is a dead end.
 
 ---
 
@@ -281,14 +309,16 @@ Produce the FAQ creation report with an **auditable verification section**:
   > "<the exact passage from the website content that verifies this answer>"
 
 ## Needs Human Input (could not be 100% verified from the website)
-| Question | Evidence (who asked, how often) | What is missing to verify |
+| Question | Evidence (who asked, how often) | Evidence needed to unlock the answer |
 |---|---|---|
 | ... | ... | ... |
 
 ## Website FAQ Section (paste-ready)
 <Markdown accordion with questions + answers, grouped by target page>
 
-## FAQPage Structured Data (for search-engine rich results)
+## FAQPage Structured Data (machine-readable, optional)
+*Valid Schema.org that keeps the FAQ parseable by AI assistants and crawlers.
+Google retired FAQ rich results in May 2026 — do not promise rich snippets.*
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -312,6 +342,10 @@ Produce the FAQ creation report with an **auditable verification section**:
   not backed by a retrieved passage, the question goes to "needs human input".
 - **No passage, no FAQ.** Always attach the verbatim source passages — the site
   owner must be able to audit where every answer comes from.
+- **No marketing fluff or AI tells in answers.** Answers are reference
+  material, not promotion: generic adjectives ("seamless", "powerful",
+  "flexible"), contrast reveals, and negation lists make answers sound like
+  ads and quote terribly when AI engines extract them.
 - **One question per node.** A wall-of-text FAQ node destroys retrieval; one
   canonical question per node surfaces reliably.
 - **Deduplicate before creating.** Always check `labels=["faq"]` first; update
