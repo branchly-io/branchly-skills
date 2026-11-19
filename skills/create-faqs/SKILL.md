@@ -157,7 +157,7 @@ If no `content-ideas` output is at hand, pull the same signals directly
 (default: trailing 30 days):
 
 ```bash
-# Exact question phrasings
+# Search queries — often search-as-you-type fragments; merge partials (see Step 2)
 branchly_get_top_searches(time_filter="<start>,<end>", limit=20)
 
 # Recurring themes worth covering
@@ -208,6 +208,12 @@ branchly_read_session_detail(session_id="...")
 
 - Merge phrasing variants into **one canonical question** (keep the most natural
   visitor phrasing).
+- **Chat outweighs search.** Queries from the search interface come from
+  search-as-you-type and are often partial fragments ("datenschu", "caree",
+  "embed c"): merge every fragment into its full form before counting it, and
+  never treat a fragment as a question on its own. Chat queries are deliberate
+  submissions — when the same theme appears in both, prefer the chat phrasing
+  and weight it higher.
 - Rank by frequency, cross-signal confirmation (how many independent signals
   point at this question/theme), and journey value (Awareness → Consideration →
   Booking/Contact → Support).

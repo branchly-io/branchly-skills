@@ -95,6 +95,8 @@ branchly_get_top_searches(time_filter="last_30_days", limit=20)
 ```
 Analyze what users type into search bars or chat. Queries that appear repeatedly represent immediate content demand.
 
+**Beware search-as-you-type noise:** queries from the search interface are often half-typed fragments ("datenschu", "caree", "embed c") — cluster them into their full form before counting demand, and never treat a fragment as a standalone question. Chat queries are deliberate submissions and the higher-fidelity intent signal: when both exist, prefer the chat phrasing and weight it above search.
+
 ### 3b. Unanswered & Low-Confidence Queries
 ```bash
 # Check answer distributions for no_knowledge or confusion indicators
@@ -211,4 +213,5 @@ Deliver a structured, human-readable report:
 - **Don't recommend FAQ questions that already exist on the page:** Audit the target page and the site's FAQ page for existing Q&A blocks (Step 3c, "Already Answered") before proposing an FAQ question set — recommend linking or enriching the existing answer instead of duplicating it.
 - **Do not draft vague placeholders:** Provide exact, realistic user questions (e.g. *"Do you support self-hosted instances?"* not *"Technical questions"*).
 - **Distinguish origin pages from clicked URLs:** Interaction sources tell you where the user felt the need to ask; clicked URLs tell you what they found useful.
+- **Search-as-you-type noise:** search-interface queries are often partial typing fragments — merge them to their full form and weight chat queries higher before concluding demand.
 - **Filter development traffic:** Ignore or flag test domains/localhost URLs if present in interaction metrics.
