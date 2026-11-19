@@ -188,12 +188,13 @@ branchly_read_session_detail(session_id="...")
 - `follow_up_question` sessions are gold: the visitor got an answer but still
   needed more — exactly the nuance an FAQ should capture.
 - **Suggested questions with a complete answer are a good proxy for finished
-  Q&A pairs.** branchly interfaces show question suggestions (nodes carry
-  `manual_suggested_questions`, often page-specific). When a suggested
-  question ends in a `complete` answer, the question is proven and the
-  answering content exists — pull them via `branchly_list_nodes` /
-  `branchly_read_node` and treat each pair as a prime FAQ candidate (still
-  ground the answer via Step 3 before publishing).
+  Q&A pairs.** Session history entries carry an `is_suggested_question`
+  indicator — a query that came from a question suggestion shown on the page.
+  When such a question ends in a `complete` answer, the question is proven
+  and the answering content exists: a ready-made Q&A pair and a prime FAQ
+  candidate. Pull them via `branchly_read_sessions` /
+  `branchly_read_session_detail` and still ground the answer via Step 3
+  before publishing.
 - A question whose theme appears in **several signals at once** — a search query,
   a trending topic or tag, and an interaction source all pointing at the same
   page — is the strongest FAQ candidate.

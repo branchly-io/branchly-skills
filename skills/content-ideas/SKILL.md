@@ -129,7 +129,7 @@ Group your findings into three clear editorial packages:
 ### 1. FAQ Recommendations (Ready for `create-faqs` skill)
 Identify pages where adding an on-page FAQ accordion or section directly resolves visitor friction.
 **Exclude questions the target page or the site's FAQ page already answers** — classify them "Already Answered" in Step 3c and list them separately as link/enrichment suggestions instead of including them in the question set.
-**Suggested questions with a complete answer are a good proxy for finished Q&A pairs:** nodes carry suggested questions (`manual_suggested_questions`), often page-specific. When the assistant answers one completely, the chat answer already works — recommend it as FAQ content for that page, so the answer becomes visible without chatting.
+**Suggested questions with a complete answer are a good proxy for finished Q&A pairs:** session history entries carry an `is_suggested_question` indicator. When a suggested question ends in a complete answer, the chat answer already works — recommend it as FAQ content for that page, so the answer becomes visible without chatting.
 For each recommendation, provide:
 - **Target Page URL:** The exact page where the FAQ section should be placed.
 - **List of Specific Questions (3–5 concrete questions):** Exact phrasing of questions users are asking.
