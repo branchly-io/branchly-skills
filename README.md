@@ -99,6 +99,10 @@ npx skills add branchly-io/branchly-skills --skill website-insights
 - [OpenCode](https://opencode.ai) or any other agent platform (Claude Code, Codex, Gemini CLI, Cursor, etc.) with the [branchly MCP server](https://branchly.io/en/docs/mcp-server) configured
 - branchly MCP server connected (provides `branchly_*` tools)
 
+## Versioning
+
+Every skill tracks its version in `metadata.version` (semantic versioning): **minor** for new capabilities, **patch** for fixes and docs-only changes, **major** for fundamental rework. Any PR that changes a skill bumps that skill's version.
+
 ## License
 
 MIT
