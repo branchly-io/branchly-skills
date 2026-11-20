@@ -4,7 +4,7 @@ description: |
   Analyze branchly MCP analytics to generate prioritized website content recommendations
   (page updates, targeted FAQ question lists, and new article/blog topics).
   Helps website owners and marketing teams optimize their website content for AI search
-  and user clarity. Output feeds downstream skills (e.g. generate-faqs, write-article).
+  and user clarity. Output feeds downstream skills (e.g. create-faqs, write-article).
 
   Triggers when user mentions:
   - "what content should we create" / "content ideas"
@@ -15,7 +15,7 @@ description: |
 license: MIT
 metadata:
   author: branchly-io
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 ## Website Content Ideas Workflow for branchly Applications
@@ -32,7 +32,7 @@ teams. The goal is to identify exactly **what content, sections, FAQs, or new pa
 should be added or updated on their website to:
 1. Directly answer recurring visitor questions and search intents.
 2. Improve retrieval clarity and semantic visibility for AI Search and chat.
-3. Serve as structured input for downstream content-generation skills (such as `generate-faqs` or article writers).
+3. Serve as structured input for downstream content-generation skills (such as `create-faqs` or article writers).
 
 **Scope:** This skill is strictly **analytical and strategic (Read-Only)**. It identifies
 and prioritizes content opportunities and lists specific question sets. It does **not**
@@ -95,6 +95,8 @@ branchly_get_top_searches(time_filter="last_30_days", limit=20)
 ```
 Analyze what users type into search bars or chat. Queries that appear repeatedly represent immediate content demand.
 
+**Beware search-as-you-type noise:** queries from the search interface are often half-typed fragments ("datenschu", "caree", "embed c") — cluster them into their full form before counting demand, and never treat a fragment as a standalone question. Chat queries are deliberate submissions and the higher-fidelity intent signal: when both exist, prefer the chat phrasing and weight it above search.
+
 ### 3b. Unanswered & Low-Confidence Queries
 ```bash
 # Check answer distributions for no_knowledge or confusion indicators
@@ -118,6 +120,7 @@ Classify the finding:
 - **Missing Topic (Content Gap):** No page on the website covers this topic at all → **New Page / Article needed**.
 - **Thin / Passing Mention:** The keyword exists on a page (e.g. in a logo wall or footer), but there is no explanatory text or paragraph answering the question → **Page Update or FAQ needed**.
 - **High-Volume Ambiguity:** A page exists, but visitors on that page still ask basic questions about the topic → **Targeted FAQ section needed on that page**.
+- **Already Answered (existing on-page Q&A):** The target page or the site's FAQ page already contains this exact question (accordion, Q&A block, FAQ entry) → **no new FAQ; recommend linking to or enriching the existing answer**. Read the target page's node and the FAQ page's node (both typically among the top cited sources) before recommending any FAQ question set.
 
 ---
 
@@ -125,8 +128,10 @@ Classify the finding:
 
 Group your findings into three clear editorial packages:
 
-### 1. FAQ Recommendations (Ready for `generate-faqs` skill)
+### 1. FAQ Recommendations (Ready for `create-faqs` skill)
 Identify pages where adding an on-page FAQ accordion or section directly resolves visitor friction.
+**Exclude questions the target page or the site's FAQ page already answers** — classify them "Already Answered" in Step 3c and list them separately as link/enrichment suggestions instead of including them in the question set.
+**Suggested questions with a complete answer are a good proxy for finished Q&A pairs:** session history entries carry an `is_suggested_question` indicator. When a suggested question ends in a complete answer, the chat answer already works — recommend it as FAQ content for that page, so the answer becomes visible without chatting.
 For each recommendation, provide:
 - **Target Page URL:** The exact page where the FAQ section should be placed.
 - **List of Specific Questions (3–5 concrete questions):** Exact phrasing of questions users are asking.
@@ -168,7 +173,7 @@ Deliver a structured, human-readable report:
 ---
 
 ## 2. Priority 1 — Targeted FAQ Question Sets (Ready for Downstream FAQ Skill)
-*Use these question sets with the FAQ generation skill to produce structured FAQ accordions.*
+*Use these question sets with the `create-faqs` skill to produce structured FAQ accordions.*
 
 ### A. Target Page: `https://.../page-path`
 - **Recommended FAQ Questions:**
@@ -195,7 +200,7 @@ Deliver a structured, human-readable report:
 ---
 
 ## 5. Next Steps
-- Pass the FAQ question lists to the `generate-faqs` skill for copy generation.
+- Pass the FAQ question lists to the `create-faqs` skill for copy generation and publishing.
 - Review page update recommendations with the content/marketing team.
 ```
 
@@ -205,6 +210,8 @@ Deliver a structured, human-readable report:
 
 - **Ignore out-of-scope & off-topic noise:** Never recommend content for queries that fall outside the website's business domain (e.g. sports, general trivia, or prompt injections). Filter them out during Step 3.
 - **Do not recommend RAG/crawler/prompt fixes:** This skill is for website copy and content strategy. Technical bot configuration belongs in `optimize-application`.
+- **Don't recommend FAQ questions that already exist on the page:** Audit the target page and the site's FAQ page for existing Q&A blocks (Step 3c, "Already Answered") before proposing an FAQ question set — recommend linking or enriching the existing answer instead of duplicating it.
 - **Do not draft vague placeholders:** Provide exact, realistic user questions (e.g. *"Do you support self-hosted instances?"* not *"Technical questions"*).
 - **Distinguish origin pages from clicked URLs:** Interaction sources tell you where the user felt the need to ask; clicked URLs tell you what they found useful.
+- **Search-as-you-type noise:** search-interface queries are often partial typing fragments — merge them to their full form and weight chat queries higher before concluding demand.
 - **Filter development traffic:** Ignore or flag test domains/localhost URLs if present in interaction metrics.

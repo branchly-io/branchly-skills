@@ -15,7 +15,7 @@ description: |
 license: MIT
 metadata:
   author: branchly-io
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 ## Website Insights Workflow for branchly Applications
@@ -193,6 +193,10 @@ booking / contact), languages vs. locales, and geographies.
   English-only locale list = localization gap (→ translation/locale action).
 - **Geographies:** growing regions suggest campaign or locale expansion (e.g.
   "Add Spanish locale for growing LATAM traffic").
+- **Search queries are search-as-you-type and often noisy:** partial typing
+  fragments ("datenschu", "caree") get logged as separate queries — merge them
+  into their full form before reporting top searches, and weight chat queries
+  higher: chat is a deliberate submission, search-as-you-type is typing.
 - Filter noise per Rule 4 (test queries, gibberish, foreign-script probes) and
   note the removal count.
 
